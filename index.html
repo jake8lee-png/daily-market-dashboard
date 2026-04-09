@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한미 시장 Daily 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d0d1a;color:#e0e0e0;font-family:'Apple SD Gothic Neo','Pretendard',sans-serif;line-height:1.6;padding:20px}
+.container{max-width:1440px;margin:0 auto}
+h1{text-align:center;font-size:1.6rem;color:#fff;padding:24px 0 4px}
+.subtitle{text-align:center;color:#888;font-size:0.85rem;margin-bottom:18px}
+.loading{text-align:center;color:#555;padding:60px;font-size:1.1rem}
+
+.kpi-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:22px}
+@media(max-width:1100px){.kpi-bar{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.kpi-bar{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#12122a;border-radius:10px;padding:14px 16px;text-align:center}
+.kpi .label{font-size:0.72rem;color:#666;font-weight:600;letter-spacing:.04em;margin-bottom:4px}
+.kpi .val{font-size:1.3rem;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.kpi .chg{font-size:0.82rem;font-weight:700;margin-top:2px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+@media(max-width:960px){.grid2{grid-template-columns:1fr}}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px}
+@media(max-width:960px){.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid3{grid-template-columns:1fr}}
+
+.panel{background:#12122a;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.panel-header{padding:16px 18px 10px;border-top:3px solid #3498db}
+.panel-name{font-size:1.15rem;font-weight:800;margin-bottom:2px}
+.meta-bar{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;padding:8px 12px;background:#0d0d1a;border-radius:8px}
+.meta-item{display:flex;align-items:baseline;gap:5px}
+.meta-label{font-size:0.7rem;color:#555;font-weight:600}
+.meta-val{font-size:0.95rem;color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+.meta-chg{font-size:0.8rem;font-weight:700;margin-left:2px}
+
+.sec{padding:14px 18px;border-top:1px solid #1a1a35}
+.sec-title{font-size:0.78rem;font-weight:700;color:#888;letter-spacing:.05em;margin-bottom:10px;text-transform:uppercase}
+.chart-wrap{padding:14px 18px}
+.chart-wrap canvas{max-height:180px}
+
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+th{color:#555;font-weight:600;padding:5px 6px;text-align:left;border-bottom:1px solid #1e1e3a;font-size:0.72rem}
+td{padding:4px 6px;border-bottom:1px solid #111125;vertical-middle}
+tr:hover td{background:#1a1a40}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.bold{font-weight:700}
+.green{color:#4caf80}
+.red{color:#ef5350}
+.orange{color:#ffa726}
+.muted{color:#555}
+
+.heatmap{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
+.hm-cell{padding:6px 10px;border-radius:6px;font-size:0.76rem;font-weight:700;text-align:center;min-width:80px}
+
+.cross-card{background:#12122a;border-radius:10px;padding:14px;text-align:center}
+.cross-card .cc-label{font-size:0.72rem;color:#666;font-weight:600;margin-bottom:4px}
+.cross-card .cc-val{font-size:1.2rem;font-weight:800;color:#fff}
+.cross-card .cc-chg{font-size:0.8rem;font-weight:700;margin-top:2px}
+.cross-card canvas{margin-top:8px;max-height:40px}
+
+.credit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:900px){.credit-grid{grid-template-columns:repeat(2,1fr)}}
+.credit-card{background:#12122a;border-radius:10px;padding:14px 16px;text-align:center}
+.credit-card .c-label{font-size:0.72rem;color:#666;font-weight:600;margin-bottom:4px}
+.credit-card .c-val{font-size:1.15rem;font-weight:800;color:#fff}
+.credit-card .c-sub{font-size:0.75rem;color:#888;margin-top:3px}
+
+.section-header{font-size:1rem;font-weight:800;color:#fff;margin:28px 0 14px;padding-left:4px;display:flex;align-items:center;gap:8px}
+.section-header .badge{font-size:0.65rem;background:#1e1e3a;color:#7986cb;padding:2px 8px;border-radius:3px;font-weight:700}
+
+.source{text-align:center;color:#333;font-size:0.72rem;margin-top:28px;padding-bottom:16px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>한미 시장 Daily 대시보드</h1>
+<p class="subtitle" id="subtitle">데이터 로딩 중...</p>
+
+<!-- KPI 바 -->
+<div class="kpi-bar" id="kpi-bar"></div>
+
+<!-- 한국 시장 -->
+<div class="section-header">한국 시장 <span class="badge" id="kr-date"></span></div>
+<div class="grid2">
+  <div class="panel">
+    <div class="panel-header" id="kospi-header" style="border-top-color:#3498db"></div>
+    <div class="chart-wrap"><canvas id="chartKospi"></canvas></div>
+    <div class="sec"><div class="sec-title">섹터별 등락 (KOSPI)</div><div class="heatmap" id="hm-kospi"></div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header" id="kosdaq-header" style="border-top-color:#9b59b6"></div>
+    <div class="chart-wrap"><canvas id="chartKosdaq"></canvas></div>
+    <div class="sec"><div class="sec-title">섹터별 등락 (KOSDAQ)</div><div class="heatmap" id="hm-kosdaq"></div></div>
+  </div>
+</div>
+
+<!-- 시총 상위 (한국) -->
+<div class="section-header">시총 상위 종목 <span class="badge">KOSPI·KOSDAQ</span></div>
+<div class="grid2">
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSPI 시총 TOP 10</div>
+    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th></tr></thead><tbody id="mcap-kospi"></tbody></table>
+  </div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSDAQ 시총 TOP 10</div>
+    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th></tr></thead><tbody id="mcap-kosdaq"></tbody></table>
+  </div></div>
+</div>
+
+<!-- 신용/예탁금/외국인 -->
+<div class="section-header">신용잔고 · 예탁금 · 외국인 수급 <span class="badge">자동 업데이트</span></div>
+<div class="credit-grid" id="credit-cards"></div>
+<div class="grid2">
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">거래대금 추이 2주 (KOSPI+KOSDAQ, 조원)</div><canvas id="chartTradingVal" height="50"></canvas></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">외국인 순매수 2주 추이 (KOSPI, 억원)</div><canvas id="chartForeignKospi" height="50"></canvas></div></div>
+</div>
+
+<!-- 미국 시장 -->
+<div class="section-header">미국 시장 <span class="badge" id="us-date"></span></div>
+<div class="grid2">
+  <div class="panel">
+    <div class="panel-header" id="sp500-header" style="border-top-color:#e74c3c"></div>
+    <div class="chart-wrap"><canvas id="chartSP500"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header" id="nasdaq-header" style="border-top-color:#2ecc71"></div>
+    <div class="chart-wrap"><canvas id="chartNasdaq"></canvas></div>
+  </div>
+</div>
+
+<!-- 시총 상위 (미국) -->
+<div class="grid2">
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">S&P 500 시총 TOP 10</div>
+    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th></tr></thead><tbody id="mcap-sp500"></tbody></table>
+  </div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">NASDAQ 시총 TOP 10</div>
+    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th></tr></thead><tbody id="mcap-nasdaq"></tbody></table>
+  </div></div>
+</div>
+
+<!-- 크로스마켓 -->
+<div class="section-header">크로스마켓 지표</div>
+<div class="grid3" id="cross-cards"></div>
+
+<div class="source">
+  데이터 출처: Yahoo Finance · DART 전자공시 · 금융투자협회<br>
+  GitHub Actions로 매일 자동 업데이트 (오후 4시 KST + 오전 7시 KST)
+</div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CHART HELPERS
+// ════════════════════════════════════════════════════════════
+const DG = {color:'#1e1e3a'};
+const NG = {display:false};
+const DT = {color:'#555',font:{size:10}};
+
+function lineChart(id, labels, data, color) {
+  new Chart(document.getElementById(id), {
+    type:'line',
+    data:{labels, datasets:[{data, borderColor:color, backgroundColor:color+'15', borderWidth:2, pointRadius:2, pointBackgroundColor:color, fill:true, tension:0.3}]},
+    options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{ticks:DT, grid:DG}, x:{ticks:DT, grid:NG}}}
+  });
+}
+function sparkline(id, data, color) {
+  const c = color || (data[data.length-1] >= data[0] ? '#4caf80' : '#ef5350');
+  new Chart(document.getElementById(id), {
+    type:'line',
+    data:{labels:data.map((_,i)=>i), datasets:[{data, borderColor:c, backgroundColor:c+'15', borderWidth:1.5, pointRadius:0, fill:true, tension:0.3}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{enabled:false}}, scales:{x:{display:false},y:{display:false}}}
+  });
+}
+function chgClass(v) { return v >= 0 ? 'green' : 'red'; }
+function chgText(v) { return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+function fmtNum(v) { return v.toLocaleString('ko-KR'); }
+
+// ════════════════════════════════════════════════════════════
+// RENDER FROM JSON
+// ════════════════════════════════════════════════════════════
+async function init() {
+  let D;
+  try {
+    const resp = await fetch('data/market.json?t=' + Date.now());
+    D = await resp.json();
+  } catch(e) {
+    document.getElementById('subtitle').textContent = '데이터 로드 실패 — data/market.json을 확인하세요';
+    return;
+  }
+
+  document.getElementById('subtitle').innerHTML =
+    `KOSPI · KOSDAQ · S&P 500 · NASDAQ | 기준일: <strong style="color:#fff">${D.date}</strong> | 업데이트: ${new Date(D.updated_at).toLocaleString('ko-KR')}`;
+
+  // ── KPI 바 ──
+  const kpis = [
+    {label:'KOSPI', data: D.kospi_chart},
+    {label:'KOSDAQ', data: D.kosdaq_chart},
+    {label:'S&P 500', data: D.sp500},
+    {label:'NASDAQ', data: D.nasdaq},
+    {label:'VIX', data: D.vix},
+    {label:'USD/KRW', data: D.krw},
+  ];
+  const kpiBar = document.getElementById('kpi-bar');
+  kpis.forEach(k => {
+    if (!k.data) return;
+    const cur = k.data.current;
+    const prev = k.data.prev_close || (k.data.closes.length > 1 ? k.data.closes[k.data.closes.length - 2] : cur);
+    const diff = cur - prev;
+    const pct = prev ? (diff / prev * 100) : 0;
+    const isGood = (k.label === 'VIX' || k.label === 'USD/KRW') ? diff <= 0 : diff >= 0;
+    const cls = isGood ? 'green' : 'red';
+    const el = document.createElement('div');
+    el.className = 'kpi';
+    el.innerHTML = `<div class="label">${k.label}</div><div class="val">${fmtNum(cur)}</div><div class="chg ${cls}">${diff >= 0 ? '+' : ''}${diff.toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
+    kpiBar.appendChild(el);
+  });
+
+  // ── 한국 시장 패널 ──
+  document.getElementById('kr-date').textContent = D.date;
+  if (D.kospi_chart) {
+    document.getElementById('kospi-header').innerHTML = `<div class="panel-name" style="color:#3498db">KOSPI</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmtNum(D.kospi_chart.current)}</span></div></div>`;
+    lineChart('chartKospi', D.kospi_chart.dates, D.kospi_chart.closes, '#3498db');
+  }
+  if (D.kosdaq_chart) {
+    document.getElementById('kosdaq-header').innerHTML = `<div class="panel-name" style="color:#9b59b6">KOSDAQ</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmtNum(D.kosdaq_chart.current)}</span></div></div>`;
+    lineChart('chartKosdaq', D.kosdaq_chart.dates, D.kosdaq_chart.closes, '#9b59b6');
+  }
+
+  // ── 섹터 히트맵 (수동 데이터) ──
+  if (D.sectors_kospi) renderHeatmap('hm-kospi', D.sectors_kospi);
+  if (D.sectors_kosdaq) renderHeatmap('hm-kosdaq', D.sectors_kosdaq);
+
+  // ── 시총 상위 종목 ──
+  if (D.kospi_stocks) renderStocks('mcap-kospi', D.kospi_stocks);
+  if (D.kosdaq_stocks) renderStocks('mcap-kosdaq', D.kosdaq_stocks);
+  if (D.sp500_stocks) renderStocks('mcap-sp500', D.sp500_stocks);
+  if (D.nasdaq_stocks) renderStocks('mcap-nasdaq', D.nasdaq_stocks);
+
+  // ── 신용/예탁금 ──
+  if (D.credit) {
+    const cc = document.getElementById('credit-cards');
+    const items = [
+      {label:'KOSPI 신용잔고', val:D.credit.kospi, sub:D.credit.kospi_chg},
+      {label:'KOSDAQ 신용잔고', val:D.credit.kosdaq, sub:D.credit.kosdaq_chg},
+      {label:'신용융자/예탁금', val:D.credit.ratio, sub:'위험: 25% 이상 주의'},
+      {label:'투자자 예탁금', val:D.credit.deposit, sub:D.credit.deposit_chg},
+    ];
+    items.forEach(it => {
+      const el = document.createElement('div');
+      el.className = 'credit-card';
+      el.innerHTML = `<div class="c-label">${it.label}</div><div class="c-val">${it.val}</div><div class="c-sub">${it.sub}</div>`;
+      cc.appendChild(el);
+    });
+  }
+
+  // ── 거래대금/외국인 차트 ──
+  if (D.trading_daily) {
+    new Chart(document.getElementById('chartTradingVal'), {
+      type:'bar', data:{labels:D.trading_daily.dates, datasets:[
+        {label:'KOSPI', data:D.trading_daily.kospi, backgroundColor:'#3498db88', borderRadius:4},
+        {label:'KOSDAQ', data:D.trading_daily.kosdaq, backgroundColor:'#9b59b688', borderRadius:4}
+      ]}, options:{responsive:true, plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},boxWidth:14}}}, scales:{y:{ticks:DT,grid:DG,stacked:true},x:{ticks:DT,grid:NG,stacked:true}}}
+    });
+  }
+  if (D.foreign) {
+    new Chart(document.getElementById('chartForeignKospi'), {
+      type:'bar', data:{labels:D.foreign.dates, datasets:[{data:D.foreign.kospi, backgroundColor:D.foreign.kospi.map(v=>v>=0?'#3498db88':'#ef535088'), borderRadius:3}]},
+      options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}
+    });
+  }
+
+  // ── 미국 시장 ──
+  document.getElementById('us-date').textContent = D.date;
+  if (D.sp500) {
+    document.getElementById('sp500-header').innerHTML = `<div class="panel-name" style="color:#e74c3c">S&P 500</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmtNum(D.sp500.current)}</span></div></div>`;
+    lineChart('chartSP500', D.sp500.dates, D.sp500.closes, '#e74c3c');
+  }
+  if (D.nasdaq) {
+    document.getElementById('nasdaq-header').innerHTML = `<div class="panel-name" style="color:#2ecc71">NASDAQ</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmtNum(D.nasdaq.current)}</span></div></div>`;
+    lineChart('chartNasdaq', D.nasdaq.dates, D.nasdaq.closes, '#2ecc71');
+  }
+
+  // ── 크로스마켓 ──
+  const crossCards = document.getElementById('cross-cards');
+  const crossItems = [
+    {label:'VIX 공포지수', data:D.vix, fmt:v=>v.toFixed(2), color:'#ef5350'},
+    {label:'미국 10년물 금리', data:D.tnx, fmt:v=>v.toFixed(2)+'%', color:'#3498db'},
+    {label:'미국 13주 T-Bill', data:D.irx, fmt:v=>v.toFixed(2)+'%', color:'#9b59b6'},
+    {label:'USD/KRW 환율', data:D.krw, fmt:v=>fmtNum(Math.round(v)), color:'#ef5350'},
+    {label:'달러인덱스 DXY', data:D.dxy, fmt:v=>v.toFixed(2), color:'#e74c3c'},
+  ];
+  crossItems.forEach((ci, idx) => {
+    if (!ci.data) return;
+    const cur = ci.data.current;
+    const prev = ci.data.prev_close || 0;
+    const diff = cur - prev;
+    const pct = prev ? (diff/prev*100) : 0;
+    const cls = diff >= 0 ? 'green' : 'red';
+    const el = document.createElement('div');
+    el.className = 'cross-card';
+    const canvasId = 'spark_' + idx;
+    el.innerHTML = `<div class="cc-label">${ci.label}</div><div class="cc-val">${ci.fmt(cur)}</div><div class="cc-chg ${cls}">${diff>=0?'+':''}${diff.toFixed(2)} (${pct>=0?'+':''}${pct.toFixed(1)}%)</div><canvas id="${canvasId}" height="40"></canvas>`;
+    crossCards.appendChild(el);
+    setTimeout(() => sparkline(canvasId, ci.data.closes, ci.color), 50);
+  });
+}
+
+function renderHeatmap(id, sectors) {
+  const el = document.getElementById(id);
+  sectors.forEach(s => {
+    const cell = document.createElement('span');
+    cell.className = 'hm-cell';
+    const p = s.pct;
+    let bg, fg;
+    if (p >= 8) { bg='#1e4d2b'; fg='#4caf80'; }
+    else if (p >= 4) { bg='#1a3d1a'; fg='#66bb6a'; }
+    else if (p >= 0) { bg='#1a2a1a'; fg='#81c784'; }
+    else { bg='#4d1e1e'; fg='#ef5350'; }
+    cell.style.background = bg;
+    cell.style.color = fg;
+    cell.textContent = s.name + ' ' + (p>=0?'+':'') + p.toFixed(1) + '%';
+    el.appendChild(cell);
+  });
+}
+
+function renderStocks(tbodyId, stocks) {
+  const tbody = document.getElementById(tbodyId);
+  stocks.forEach(s => {
+    const cls = (s.chg >= 0) ? 'green' : 'red';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="bold">${s.name}</td><td class="num">${s.price}</td><td class="num ${cls} bold">${chgText(s.chg)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
