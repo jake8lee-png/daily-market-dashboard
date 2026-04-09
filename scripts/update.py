@@ -184,11 +184,68 @@ def build_market_data():
         data["sp500_stocks"] = sp500_stocks
         data["nasdaq_stocks"] = sp500_stocks  # 대부분 겹침
 
-    # ── 5. 거래대금/외국인 추이 (기존 데이터에 누적) ──
-    # 기존 추이 데이터 유지 + 새 데이터 추가 가능 영역
-    for key in ["trading_daily", "foreign", "deposit_weekly", "credit", "sectors_kospi", "sectors_kosdaq", "short_kospi", "short_kosdaq", "top_sector_foreign"]:
+    # ── 5. 섹터별 등락 (Yahoo Finance 섹터 ETF 프록시) ──
+    kospi_sector_etfs = {
+        "전기전자": "091230.KS", "건설": "117680.KS", "금융": "091170.KS",
+        "화학": "117460.KS", "운송장비": "091180.KS",
+    }
+    sectors_kospi = []
+    for name, sym in kospi_sector_etfs.items():
+        r = yahoo_chart(sym, rng="5d", interval="1d")
+        if r and len(r["closes"]) >= 2:
+            cur, prev = r["closes"][-1], r["closes"][-2]
+            pct = round((cur - prev) / prev * 100, 1) if prev else 0
+            sectors_kospi.append({"name": name, "pct": pct})
+    if sectors_kospi:
+        sectors_kospi.sort(key=lambda x: -x["pct"])
+        data["sectors_kospi"] = sectors_kospi
+    elif "sectors_kospi" in existing:
+        data["sectors_kospi"] = existing["sectors_kospi"]
+
+    # KOSDAQ 섹터 — 대표 ETF 부족하므로 대표종목 등락으로 추정
+    kosdaq_sectors = [
+        {"name": "IT/반도체", "pct": 0}, {"name": "바이오", "pct": 0},
+        {"name": "2차전지", "pct": 0}, {"name": "게임/엔터", "pct": 0},
+        {"name": "기계/장비", "pct": 0},
+    ]
+    kq_sector_proxies = {
+        "IT/반도체": ["039030.KS", "058470.KS"],  # 이오테크닉스, 리노공업
+        "바이오": ["196170.KS", "028300.KS"],       # 알테오젠, HLB
+        "2차전지": ["086520.KS", "247540.KS"],      # 에코프로, 에코프로비엠
+        "게임/엔터": ["263750.KS", "035720.KS"],    # 펄어비스, 카카오
+        "기계/장비": ["257720.KS"],                  # 실리콘투
+    }
+    for sec in kosdaq_sectors:
+        proxies = kq_sector_proxies.get(sec["name"], [])
+        pcts = []
+        for sym in proxies:
+            r = yahoo_chart(sym, rng="5d", interval="1d")
+            if r and len(r["closes"]) >= 2:
+                cur, prev = r["closes"][-1], r["closes"][-2]
+                pcts.append(round((cur - prev) / prev * 100, 1) if prev else 0)
+        sec["pct"] = round(sum(pcts) / len(pcts), 1) if pcts else 0
+    kosdaq_sectors.sort(key=lambda x: -x["pct"])
+    data["sectors_kosdaq"] = kosdaq_sectors
+
+    # ── 6. 신용잔고 / 예탁금 (기본값 + 기존 누적) ──
+    if "credit" in existing:
+        data["credit"] = existing["credit"]
+    else:
+        data["credit"] = {
+            "kospi": "—", "kospi_chg": "업데이트 필요",
+            "kosdaq": "—", "kosdaq_chg": "업데이트 필요",
+            "ratio": "—", "deposit": "—", "deposit_chg": "업데이트 필요"
+        }
+
+    # ── 7. 거래대금/외국인 추이 (기존 데이터에 누적) ──
+    for key in ["trading_daily", "foreign", "deposit_weekly",
+                "short_kospi", "short_kosdaq", "top_sector_foreign"]:
         if key in existing:
             data[key] = existing[key]
+        elif key == "trading_daily":
+            data[key] = {"dates": [], "kospi": [], "kosdaq": []}
+        elif key == "foreign":
+            data[key] = {"dates": [], "kospi": [], "kosdaq": []}
 
     return data
 

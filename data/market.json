@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-10T06:32:33.850603+09:00",
+  "updated_at": "2026-04-10T06:43:29.345602+09:00",
   "date": "2026-04-10",
   "sp500": {
     "symbol": "%5EGSPC",
@@ -370,7 +370,7 @@
     "symbol": "KRW%3DX",
     "name": "USD/KRW",
     "currency": "KRW",
-    "current": 1472.8,
+    "current": 1474.42,
     "prev_close": 1483.89,
     "dates": [
       "03-16",
@@ -414,7 +414,7 @@
       1507.85,
       1499.13,
       1477.6,
-      1472.8
+      1474.42
     ],
     "volumes": [
       0,
@@ -885,5 +885,68 @@
       "price": "$310.33",
       "chg": 0.8
     }
-  ]
+  ],
+  "sectors_kospi": [
+    {
+      "name": "화학",
+      "pct": 1.2
+    },
+    {
+      "name": "건설",
+      "pct": -0.5
+    },
+    {
+      "name": "금융",
+      "pct": -1.0
+    },
+    {
+      "name": "전기전자",
+      "pct": -1.8
+    },
+    {
+      "name": "운송장비",
+      "pct": -2.2
+    }
+  ],
+  "sectors_kosdaq": [
+    {
+      "name": "기계/장비",
+      "pct": 4.4
+    },
+    {
+      "name": "바이오",
+      "pct": 0.3
+    },
+    {
+      "name": "게임/엔터",
+      "pct": -0.6
+    },
+    {
+      "name": "2차전지",
+      "pct": -2.0
+    },
+    {
+      "name": "IT/반도체",
+      "pct": -3.4
+    }
+  ],
+  "credit": {
+    "kospi": "—",
+    "kospi_chg": "업데이트 필요",
+    "kosdaq": "—",
+    "kosdaq_chg": "업데이트 필요",
+    "ratio": "—",
+    "deposit": "—",
+    "deposit_chg": "업데이트 필요"
+  },
+  "trading_daily": {
+    "dates": [],
+    "kospi": [],
+    "kosdaq": []
+  },
+  "foreign": {
+    "dates": [],
+    "kospi": [],
+    "kosdaq": []
+  }
 }
