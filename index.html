@@ -147,6 +147,13 @@ tr:hover td{background:#1a1a40}
   <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSDAQ 외국인 일별 (이번 주, 억원)</div><canvas id="wcFQ" height="50"></canvas></div></div>
 </div>
 
+<div class="section-header">신용잔고 · 예탁금 — 주간 추이</div>
+<div class="credit-grid" id="wcc"></div>
+<div class="grid2">
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">신용잔고 주간 추이 (조원)</div><canvas id="wcCredit" height="50"></canvas></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">투자자 예탁금 주간 추이 (조원)</div><canvas id="wcDeposit" height="50"></canvas></div></div>
+</div>
+
 <div class="section-header">미국 시장 — 주간</div>
 <div class="grid2">
   <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">S&P 500 시총 TOP 10 — 주간</div>
@@ -309,6 +316,27 @@ async function init(){
     if(W.foreign_weekly&&W.foreign_weekly.dates.length){
       new Chart(document.getElementById('wcFK'),{type:'bar',data:{labels:W.foreign_weekly.dates,datasets:[{data:W.foreign_weekly.kospi,backgroundColor:W.foreign_weekly.kospi.map(v=>v>=0?'#3498db88':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
       new Chart(document.getElementById('wcFQ'),{type:'bar',data:{labels:W.foreign_weekly.dates,datasets:[{data:W.foreign_weekly.kosdaq,backgroundColor:W.foreign_weekly.kosdaq.map(v=>v>=0?'#9b59b688':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
+    }
+
+    // Weekly 신용잔고/예탁금 카드
+    if(W.credit){
+      const wc=document.getElementById('wcc');
+      [{l:'KOSPI 신용잔고',v:W.credit.kospi,s:W.credit.kospi_chg},
+       {l:'KOSDAQ 신용잔고',v:W.credit.kosdaq,s:W.credit.kosdaq_chg},
+       {l:'신용융자/예탁금',v:W.credit.ratio,s:W.credit.ratio_chg},
+       {l:'투자자 예탁금',v:W.credit.deposit,s:W.credit.deposit_chg}
+      ].forEach(it=>{const el=document.createElement('div');el.className='credit-card';
+        el.innerHTML=`<div class="c-label">${it.l}</div><div class="c-val">${it.v}</div><div class="c-sub">${it.s}</div>`;wc.appendChild(el)})
+    }
+
+    // Weekly 신용잔고 + 예탁금 추이 차트
+    if(W.credit_weekly){
+      const cw=W.credit_weekly;
+      new Chart(document.getElementById('wcCredit'),{type:'line',data:{labels:cw.dates,datasets:[
+        {label:'KOSPI 신용',data:cw.kospi,borderColor:'#3498db',borderWidth:2,pointRadius:3,tension:.3,fill:false},
+        {label:'KOSDAQ 신용',data:cw.kosdaq,borderColor:'#9b59b6',borderWidth:2,pointRadius:3,tension:.3,borderDash:[4,2],fill:false}
+      ]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},boxWidth:14}}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
+      LC('wcDeposit',cw.dates,cw.deposit,'#7ecfff');
     }
   }
 }
