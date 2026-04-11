@@ -147,6 +147,64 @@ def build():
         elif key in ("trading_daily","foreign"):
             D[key] = {"dates":[],"kospi":[],"kosdaq":[]}
 
+    # ── 8. 주간(5영업일) 누적 데이터 자동 계산 ──
+    print("  주간 누적 계산...")
+    weekly = {}
+
+    # 지수 주간 등락
+    for key in ["kospi_chart","kosdaq_chart","sp500","nasdaq","vix","krw","dxy","tnx"]:
+        d = D.get(key)
+        if d and len(d.get("closes",[])) >= 5:
+            c = d["closes"]
+            cur, w_ago = c[-1], c[-5]
+            weekly[key] = {"cur": cur, "w_ago": w_ago, "chg_pct": round(pct(cur, w_ago), 2)}
+
+    # 종목 주간 등락 (1mo 데이터에서 -5일 vs 현재)
+    def weekly_stocks(stocks_dict, label):
+        result = []
+        for name, sym in stocks_dict.items():
+            r = D.get(label, [])  # 이미 수집된 daily 데이터 사용
+            # daily에서는 5일치만 있으므로 1mo로 재계산
+            rd = yahoo(sym, rng="1mo", interval="1d")
+            if rd and len(rd["closes"]) >= 5:
+                cur, w_ago = rd["closes"][-1], rd["closes"][-5]
+                result.append({"name": name, "price": f"{int(cur):,}", "chg_w": round(pct(cur, w_ago), 1)})
+        return result
+
+    wk_kospi = weekly_stocks(kr_kospi, "kospi_stocks")
+    if wk_kospi: weekly["kospi_stocks"] = wk_kospi
+    wk_kosdaq = weekly_stocks(kr_kosdaq, "kosdaq_stocks")
+    if wk_kosdaq: weekly["kosdaq_stocks"] = wk_kosdaq
+
+    # 미국 종목 주간
+    wk_us = []
+    for name, sym in us.items():
+        rd = yahoo(sym, rng="1mo", interval="1d")
+        if rd and len(rd["closes"]) >= 5:
+            cur, w_ago = rd["closes"][-1], rd["closes"][-5]
+            wk_us.append({"name": f"{name} ({sym})", "price": f"${cur:,.2f}", "chg_w": round(pct(cur, w_ago), 1)})
+    if wk_us:
+        weekly["sp500_stocks"] = wk_us
+        weekly["nasdaq_stocks"] = wk_us
+
+    # 섹터 주간 등락 (ETF 프록시)
+    wk_sectors_k = []
+    for name, sym in kospi_etfs.items():
+        rd = yahoo(sym, rng="1mo", interval="1d")
+        if rd and len(rd["closes"]) >= 5:
+            cur, w_ago = rd["closes"][-1], rd["closes"][-5]
+            wk_sectors_k.append({"name": name, "pct": round(pct(cur, w_ago), 1)})
+    if wk_sectors_k:
+        wk_sectors_k.sort(key=lambda x: -x["pct"])
+        weekly["sectors_kospi"] = wk_sectors_k
+
+    # 기존 주간 수동 데이터 유지
+    if "weekly" in ex:
+        for k in ["sectors_kospi_full","sectors_kosdaq","top_sector_foreign","foreign_weekly"]:
+            if k in ex["weekly"]: weekly[k] = ex["weekly"][k]
+
+    D["weekly"] = weekly
+
     return D
 
 
