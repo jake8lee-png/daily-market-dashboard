@@ -106,6 +106,9 @@ function LC(id,labels,data,color){new Chart(document.getElementById(id),{type:'l
 function SL(id,data,color){const c=color||(data[data.length-1]>=data[0]?'#4caf80':'#ef5350');new Chart(document.getElementById(id),{type:'line',data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:c,backgroundColor:c+'15',borderWidth:1.5,pointRadius:0,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}})}
 function fmt(v){return v.toLocaleString('ko-KR')}
 function pct(c,p){return p?((c-p)/p*100):0}
+// 키 호환: cur/current, prev/prev_close 둘 다 지원
+function C(d){return d.cur!==undefined?d.cur:d.current||0}
+function P(d){return d.prev!==undefined?d.prev:d.prev_close||0}
 
 async function init(){
   let D;
@@ -121,7 +124,7 @@ async function init(){
   const kb=document.getElementById('kpi-bar');
   kpis.forEach(k=>{
     if(!k.d)return;
-    const cur=k.d.cur,prev=k.d.prev,diff=cur-prev,p=pct(cur,prev);
+    const cur=C(k.d),prev=P(k.d),diff=cur-prev,p=pct(cur,prev);
     const good=(k.l==='VIX'||k.l==='USD/KRW')?diff<=0:diff>=0;
     const el=document.createElement('div');el.className='kpi';
     el.innerHTML=`<div class="label">${k.l}</div><div class="val">${fmt(cur)}</div><div class="chg ${good?'green':'red'}">${diff>=0?'+':''}${diff.toFixed(2)} (${p>=0?'+':''}${p.toFixed(2)}%)</div>`;
@@ -129,8 +132,8 @@ async function init(){
   });
 
   // 한국 지수
-  if(D.kospi_chart){document.getElementById('kh').innerHTML=`<div class="panel-name" style="color:#3498db">KOSPI</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(D.kospi_chart.cur)}</span></div></div>`;LC('cK',D.kospi_chart.dates,D.kospi_chart.closes,'#3498db')}
-  if(D.kosdaq_chart){document.getElementById('qh').innerHTML=`<div class="panel-name" style="color:#9b59b6">KOSDAQ</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(D.kosdaq_chart.cur)}</span></div></div>`;LC('cQ',D.kosdaq_chart.dates,D.kosdaq_chart.closes,'#9b59b6')}
+  if(D.kospi_chart){document.getElementById('kh').innerHTML=`<div class="panel-name" style="color:#3498db">KOSPI</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(C(D.kospi_chart))}</span></div></div>`;LC('cK',D.kospi_chart.dates,D.kospi_chart.closes,'#3498db')}
+  if(D.kosdaq_chart){document.getElementById('qh').innerHTML=`<div class="panel-name" style="color:#9b59b6">KOSDAQ</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(C(D.kosdaq_chart))}</span></div></div>`;LC('cQ',D.kosdaq_chart.dates,D.kosdaq_chart.closes,'#9b59b6')}
 
   // 섹터 히트맵
   function hm(id,sectors){
@@ -166,13 +169,13 @@ async function init(){
   }
 
   // 미국 지수
-  if(D.sp500){document.getElementById('sh').innerHTML=`<div class="panel-name" style="color:#e74c3c">S&P 500</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(D.sp500.cur)}</span></div></div>`;LC('cS',D.sp500.dates,D.sp500.closes,'#e74c3c')}
-  if(D.nasdaq){document.getElementById('nh').innerHTML=`<div class="panel-name" style="color:#2ecc71">NASDAQ</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(D.nasdaq.cur)}</span></div></div>`;LC('cN',D.nasdaq.dates,D.nasdaq.closes,'#2ecc71')}
+  if(D.sp500){document.getElementById('sh').innerHTML=`<div class="panel-name" style="color:#e74c3c">S&P 500</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(C(D.sp500))}</span></div></div>`;LC('cS',D.sp500.dates,D.sp500.closes,'#e74c3c')}
+  if(D.nasdaq){document.getElementById('nh').innerHTML=`<div class="panel-name" style="color:#2ecc71">NASDAQ</div><div class="meta-bar"><div class="meta-item"><span class="meta-label">종가</span><span class="meta-val">${fmt(C(D.nasdaq))}</span></div></div>`;LC('cN',D.nasdaq.dates,D.nasdaq.closes,'#2ecc71')}
 
   // 크로스마켓
   const xc=document.getElementById('xc');
   [{l:'VIX',d:D.vix,f:v=>v.toFixed(2),c:'#ef5350'},{l:'10Y 금리',d:D.tnx,f:v=>v.toFixed(2)+'%',c:'#3498db'},{l:'13W T-Bill',d:D.irx,f:v=>v.toFixed(2)+'%',c:'#9b59b6'},{l:'USD/KRW',d:D.krw,f:v=>Math.round(v).toLocaleString(),c:'#ef5350'},{l:'DXY',d:D.dxy,f:v=>v.toFixed(2),c:'#e74c3c'}].forEach((ci,i)=>{
-    if(!ci.d)return;const cur=ci.d.cur,prev=ci.d.prev,diff=cur-prev,p=pct(cur,prev),cls=diff>=0?'green':'red';
+    if(!ci.d)return;const cur=C(ci.d),prev=P(ci.d),diff=cur-prev,p=pct(cur,prev),cls=diff>=0?'green':'red';
     const el=document.createElement('div');el.className='cross-card';const sid='sp_'+i;
     el.innerHTML=`<div class="cc-label">${ci.l}</div><div class="cc-val">${ci.f(cur)}</div><div class="cc-chg ${cls}">${diff>=0?'+':''}${diff.toFixed(2)} (${p>=0?'+':''}${p.toFixed(1)}%)</div><canvas id="${sid}" height="40"></canvas>`;
     xc.appendChild(el);setTimeout(()=>SL(sid,ci.d.closes,ci.c),50)})

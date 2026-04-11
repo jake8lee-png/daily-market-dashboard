@@ -8,6 +8,12 @@ from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
 NOW = datetime.now(KST)
+# 주말이면 마지막 거래일(금요일)로 보정
+weekday = NOW.weekday()  # 0=월 ... 6=일
+if weekday == 5:  # 토요일
+    NOW = NOW - timedelta(days=1)
+elif weekday == 6:  # 일요일
+    NOW = NOW - timedelta(days=2)
 TODAY = NOW.strftime("%Y-%m-%d")
 DATA_PATH = "data/market.json"
 
