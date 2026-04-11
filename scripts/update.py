@@ -3,265 +3,149 @@
 한미 시장 Daily 대시보드 — 데이터 자동 수집 스크립트
 GitHub Actions에서 하루 2번 실행 (오후4시 KST, 오전7시 KST)
 """
-
-import json
-import urllib.request
-import urllib.error
+import json, urllib.request, urllib.error
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
 NOW = datetime.now(KST)
 TODAY = NOW.strftime("%Y-%m-%d")
-
 DATA_PATH = "data/market.json"
 
 
 def fetch_json(url, timeout=15):
-    """URL에서 JSON 데이터 가져오기"""
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode())
     except Exception as e:
-        print(f"  [WARN] fetch failed: {url} -> {e}")
+        print(f"  [WARN] {url} -> {e}")
         return None
 
 
-def yahoo_chart(symbol, rng="1mo", interval="1d"):
-    """Yahoo Finance에서 OHLCV 데이터 가져오기"""
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range={rng}&interval={interval}"
-    raw = fetch_json(url)
-    if not raw:
-        return None
+def yahoo(symbol, rng="1mo", interval="1d"):
+    """Yahoo Finance OHLCV"""
+    raw = fetch_json(f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range={rng}&interval={interval}")
+    if not raw: return None
     try:
-        result = raw["chart"]["result"][0]
-        meta = result["meta"]
-        timestamps = result["timestamp"]
-        closes = result["indicators"]["quote"][0]["close"]
-        volumes = result["indicators"]["quote"][0].get("volume", [])
-
-        dates = []
-        clean_closes = []
-        clean_volumes = []
-        for i, ts in enumerate(timestamps):
-            dt = datetime.fromtimestamp(ts, tz=KST)
+        r = raw["chart"]["result"][0]
+        meta = r["meta"]
+        ts = r["timestamp"]
+        closes = r["indicators"]["quote"][0]["close"]
+        dates, cl = [], []
+        for i, t in enumerate(ts):
             c = closes[i]
-            v = volumes[i] if i < len(volumes) else 0
             if c is not None:
-                dates.append(dt.strftime("%m-%d"))
-                clean_closes.append(round(c, 2))
-                clean_volumes.append(v or 0)
-
-        return {
-            "symbol": symbol,
-            "name": meta.get("shortName", symbol),
-            "currency": meta.get("currency", ""),
-            "current": round(meta.get("regularMarketPrice", clean_closes[-1] if clean_closes else 0), 2),
-            "prev_close": round(meta.get("chartPreviousClose", meta.get("previousClose", 0)), 2),
-            "dates": dates[-20:],
-            "closes": clean_closes[-20:],
-            "volumes": clean_volumes[-20:],
-        }
-    except (KeyError, IndexError) as e:
-        print(f"  [WARN] parse failed for {symbol}: {e}")
-        return None
+                dates.append(datetime.fromtimestamp(t, tz=KST).strftime("%m-%d"))
+                cl.append(round(c, 2))
+        cur = round(meta.get("regularMarketPrice", cl[-1] if cl else 0), 2)
+        prev = round(meta.get("chartPreviousClose", meta.get("previousClose", 0)), 2)
+        return {"cur": cur, "prev": prev, "dates": dates[-20:], "closes": cl[-20:]}
+    except: return None
 
 
 def load_existing():
-    """기존 데이터 로드 (없으면 빈 딕셔너리)"""
     try:
-        with open(DATA_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
+        with open(DATA_PATH, "r") as f: return json.load(f)
+    except: return {}
 
 
-def build_market_data():
-    """전체 시장 데이터 수집"""
-    print(f"[{NOW.strftime('%Y-%m-%d %H:%M KST')}] 데이터 수집 시작...")
+def pct(cur, prev):
+    return round((cur - prev) / prev * 100, 2) if prev else 0
 
-    existing = load_existing()
-    data = {"updated_at": NOW.isoformat(), "date": TODAY}
 
-    # ── 1. 미국 시장 + 크로스마켓 (Yahoo Finance) ──
-    tickers = {
-        "sp500": "%5EGSPC",
-        "nasdaq": "%5EIXIC",
-        "vix": "%5EVIX",
-        "tnx": "%5ETNX",
-        "irx": "%5EIRX",
-        "krw": "KRW%3DX",
-        "dxy": "DX-Y.NYB",
-    }
+def build():
+    print(f"[{NOW.strftime('%Y-%m-%d %H:%M KST')}] 수집 시작...")
+    ex = load_existing()
+    D = {"updated_at": NOW.isoformat(), "date": TODAY}
 
-    for key, symbol in tickers.items():
-        print(f"  Fetching {key} ({symbol})...")
-        result = yahoo_chart(symbol)
-        if result:
-            data[key] = result
-        elif key in existing:
-            print(f"  -> 기존 데이터 유지: {key}")
-            data[key] = existing[key]
+    # ── 1. 미국 시장 + 크로스마켓 ──
+    tickers = {"sp500":"%5EGSPC","nasdaq":"%5EIXIC","vix":"%5EVIX","tnx":"%5ETNX","irx":"%5EIRX","krw":"KRW%3DX","dxy":"DX-Y.NYB"}
+    for k, sym in tickers.items():
+        print(f"  {k}...")
+        r = yahoo(sym)
+        if r: D[k] = r
+        elif k in ex: D[k] = ex[k]
 
-    # ── 2. 한국 시장 (Yahoo Finance — KOSPI/KOSDAQ ETF 프록시) ──
-    # KOSPI: ^KS11, KOSDAQ: ^KQ11
-    for key, symbol in [("kospi_chart", "%5EKS11"), ("kosdaq_chart", "%5EKQ11")]:
-        print(f"  Fetching {key} ({symbol})...")
-        result = yahoo_chart(symbol)
-        if result:
-            data[key] = result
-        elif key in existing:
-            data[key] = existing[key]
+    # ── 2. KOSPI/KOSDAQ 지수 차트 ──
+    for k, sym in [("kospi_chart","%5EKS11"),("kosdaq_chart","%5EKQ11")]:
+        print(f"  {k}...")
+        r = yahoo(sym)
+        if r: D[k] = r
+        elif k in ex: D[k] = ex[k]
 
-    # ── 3. 한국 시총 상위 종목 (Yahoo Finance) ──
-    kr_stocks = {
-        "삼성전자": "005930.KS", "SK하이닉스": "000660.KS", "삼성전자우": "005935.KS",
-        "현대자동차": "005380.KS", "LG에너지솔루션": "373220.KS",
-        "삼성바이오로직스": "207940.KS", "KB금융": "105560.KS",
-        "신한지주": "055550.KS", "삼성SDI": "006400.KS", "NAVER": "035420.KS",
-    }
-    kospi_stocks = []
-    for name, symbol in kr_stocks.items():
-        print(f"  Fetching {name} ({symbol})...")
-        result = yahoo_chart(symbol, rng="5d", interval="1d")
-        if result and len(result["closes"]) >= 2:
-            cur = result["closes"][-1]
-            prev = result["closes"][-2]
-            chg_pct = round((cur - prev) / prev * 100, 1) if prev else 0
-            kospi_stocks.append({
-                "name": name,
-                "price": f"{int(cur):,}",
-                "chg": chg_pct,
-                "mcap": "",  # 시총은 별도 소스 필요
-            })
-    if kospi_stocks:
-        data["kospi_stocks"] = kospi_stocks
+    # ── 3. 시총 TOP 10 (한국) ──
+    kr_kospi = {"삼성전자":"005930.KS","SK하이닉스":"000660.KS","삼성전자우":"005935.KS","현대자동차":"005380.KS","LG에너지솔루션":"373220.KS","삼성바이오로직스":"207940.KS","KB금융":"105560.KS","신한지주":"055550.KS","삼성SDI":"006400.KS","NAVER":"035420.KS"}
+    kr_kosdaq = {"카카오":"035720.KS","에코프로":"086520.KS","에코프로비엠":"247540.KS","알테오젠":"196170.KS","리노공업":"058470.KS","HLB":"028300.KS","리가켐바이오":"141080.KS","이오테크닉스":"039030.KS","펄어비스":"263750.KS","실리콘투":"257720.KS"}
 
-    # KOSDAQ 상위
-    kq_stocks = {
-        "카카오": "035720.KS", "에코프로": "086520.KS", "에코프로비엠": "247540.KS",
-        "알테오젠": "196170.KS", "리노공업": "058470.KS",
-        "HLB": "028300.KS", "리가켐바이오": "141080.KS",
-        "이오테크닉스": "039030.KS", "펄어비스": "263750.KS", "실리콘투": "257720.KS",
-    }
-    kosdaq_stocks = []
-    for name, symbol in kq_stocks.items():
-        print(f"  Fetching {name} ({symbol})...")
-        result = yahoo_chart(symbol, rng="5d", interval="1d")
-        if result and len(result["closes"]) >= 2:
-            cur = result["closes"][-1]
-            prev = result["closes"][-2]
-            chg_pct = round((cur - prev) / prev * 100, 1) if prev else 0
-            kosdaq_stocks.append({
-                "name": name,
-                "price": f"{int(cur):,}",
-                "chg": chg_pct,
-                "mcap": "",
-            })
-    if kosdaq_stocks:
-        data["kosdaq_stocks"] = kosdaq_stocks
-
-    # ── 4. 미국 시총 상위 종목 ──
-    us_stocks = {
-        "Apple": "AAPL", "Microsoft": "MSFT", "NVIDIA": "NVDA",
-        "Amazon": "AMZN", "Alphabet": "GOOGL", "Meta": "META",
-        "Berkshire": "BRK-B", "Broadcom": "AVGO", "Tesla": "TSLA", "JPMorgan": "JPM",
-    }
-    sp500_stocks = []
-    for name, symbol in us_stocks.items():
-        print(f"  Fetching {name} ({symbol})...")
-        result = yahoo_chart(symbol, rng="5d", interval="1d")
-        if result and len(result["closes"]) >= 2:
-            cur = result["closes"][-1]
-            prev = result["closes"][-2]
-            chg_pct = round((cur - prev) / prev * 100, 1) if prev else 0
-            sp500_stocks.append({
-                "name": f"{name} ({symbol})",
-                "price": f"${cur:,.2f}",
-                "chg": chg_pct,
-            })
-    if sp500_stocks:
-        data["sp500_stocks"] = sp500_stocks
-        data["nasdaq_stocks"] = sp500_stocks  # 대부분 겹침
-
-    # ── 5. 섹터별 등락 (Yahoo Finance 섹터 ETF 프록시) ──
-    kospi_sector_etfs = {
-        "전기전자": "091230.KS", "건설": "117680.KS", "금융": "091170.KS",
-        "화학": "117460.KS", "운송장비": "091180.KS",
-    }
-    sectors_kospi = []
-    for name, sym in kospi_sector_etfs.items():
-        r = yahoo_chart(sym, rng="5d", interval="1d")
-        if r and len(r["closes"]) >= 2:
-            cur, prev = r["closes"][-1], r["closes"][-2]
-            pct = round((cur - prev) / prev * 100, 1) if prev else 0
-            sectors_kospi.append({"name": name, "pct": pct})
-    if sectors_kospi:
-        sectors_kospi.sort(key=lambda x: -x["pct"])
-        data["sectors_kospi"] = sectors_kospi
-    elif "sectors_kospi" in existing:
-        data["sectors_kospi"] = existing["sectors_kospi"]
-
-    # KOSDAQ 섹터 — 대표 ETF 부족하므로 대표종목 등락으로 추정
-    kosdaq_sectors = [
-        {"name": "IT/반도체", "pct": 0}, {"name": "바이오", "pct": 0},
-        {"name": "2차전지", "pct": 0}, {"name": "게임/엔터", "pct": 0},
-        {"name": "기계/장비", "pct": 0},
-    ]
-    kq_sector_proxies = {
-        "IT/반도체": ["039030.KS", "058470.KS"],  # 이오테크닉스, 리노공업
-        "바이오": ["196170.KS", "028300.KS"],       # 알테오젠, HLB
-        "2차전지": ["086520.KS", "247540.KS"],      # 에코프로, 에코프로비엠
-        "게임/엔터": ["263750.KS", "035720.KS"],    # 펄어비스, 카카오
-        "기계/장비": ["257720.KS"],                  # 실리콘투
-    }
-    for sec in kosdaq_sectors:
-        proxies = kq_sector_proxies.get(sec["name"], [])
-        pcts = []
-        for sym in proxies:
-            r = yahoo_chart(sym, rng="5d", interval="1d")
+    def fetch_stocks(stocks_dict):
+        result = []
+        for name, sym in stocks_dict.items():
+            print(f"  {name}...")
+            r = yahoo(sym, rng="5d", interval="1d")
             if r and len(r["closes"]) >= 2:
                 cur, prev = r["closes"][-1], r["closes"][-2]
-                pcts.append(round((cur - prev) / prev * 100, 1) if prev else 0)
-        sec["pct"] = round(sum(pcts) / len(pcts), 1) if pcts else 0
-    kosdaq_sectors.sort(key=lambda x: -x["pct"])
-    data["sectors_kosdaq"] = kosdaq_sectors
+                result.append({"name": name, "price": f"{int(cur):,}", "chg": round(pct(cur, prev), 1)})
+        return result
 
-    # ── 6. 신용잔고 / 예탁금 (기본값 + 기존 누적) ──
-    if "credit" in existing:
-        data["credit"] = existing["credit"]
-    else:
-        data["credit"] = {
-            "kospi": "—", "kospi_chg": "업데이트 필요",
-            "kosdaq": "—", "kosdaq_chg": "업데이트 필요",
-            "ratio": "—", "deposit": "—", "deposit_chg": "업데이트 필요"
-        }
+    ks = fetch_stocks(kr_kospi)
+    if ks: D["kospi_stocks"] = ks
+    kq = fetch_stocks(kr_kosdaq)
+    if kq: D["kosdaq_stocks"] = kq
 
-    # ── 7. 거래대금/외국인 추이 (기존 데이터에 누적) ──
-    for key in ["trading_daily", "foreign", "deposit_weekly",
-                "short_kospi", "short_kosdaq", "top_sector_foreign"]:
-        if key in existing:
-            data[key] = existing[key]
-        elif key == "trading_daily":
-            data[key] = {"dates": [], "kospi": [], "kosdaq": []}
-        elif key == "foreign":
-            data[key] = {"dates": [], "kospi": [], "kosdaq": []}
+    # ── 4. 미국 시총 TOP 10 ──
+    us = {"Apple":"AAPL","Microsoft":"MSFT","NVIDIA":"NVDA","Amazon":"AMZN","Alphabet":"GOOGL","Meta":"META","Berkshire":"BRK-B","Broadcom":"AVGO","Tesla":"TSLA","JPMorgan":"JPM"}
+    us_stocks = []
+    for name, sym in us.items():
+        print(f"  {name}...")
+        r = yahoo(sym, rng="5d", interval="1d")
+        if r and len(r["closes"]) >= 2:
+            cur, prev = r["closes"][-1], r["closes"][-2]
+            us_stocks.append({"name": f"{name} ({sym})", "price": f"${cur:,.2f}", "chg": round(pct(cur, prev), 1)})
+    if us_stocks:
+        D["sp500_stocks"] = us_stocks
+        D["nasdaq_stocks"] = us_stocks
 
-    return data
+    # ── 5. 섹터 등락 (섹터 ETF 프록시) ──
+    kospi_etfs = {"전기전자":"091230.KS","건설":"117680.KS","금융":"091170.KS","운송장비":"091180.KS",
+                  "화학":"117460.KS","제약":"253280.KS","음식료":"117460.KS"}
+    sectors_k = []
+    for name, sym in kospi_etfs.items():
+        r = yahoo(sym, rng="5d", interval="1d")
+        if r and len(r["closes"]) >= 2:
+            cur, prev = r["closes"][-1], r["closes"][-2]
+            sectors_k.append({"name": name, "pct": round(pct(cur, prev), 1)})
+    if sectors_k:
+        sectors_k.sort(key=lambda x: -x["pct"])
+        D["sectors_kospi"] = sectors_k
+    elif "sectors_kospi" in ex: D["sectors_kospi"] = ex["sectors_kospi"]
 
+    # KOSDAQ 섹터 (대표종목 프록시)
+    kq_proxies = {"IT/반도체":["039030.KS","058470.KS"],"바이오":["196170.KS","028300.KS"],"2차전지":["086520.KS","247540.KS"],"게임/엔터":["263750.KS","035720.KS"],"기계/장비":["257720.KS"]}
+    sectors_q = []
+    for name, syms in kq_proxies.items():
+        pcts = []
+        for sym in syms:
+            r = yahoo(sym, rng="5d", interval="1d")
+            if r and len(r["closes"]) >= 2:
+                cur, prev = r["closes"][-1], r["closes"][-2]
+                pcts.append(pct(cur, prev))
+        sectors_q.append({"name": name, "pct": round(sum(pcts)/len(pcts), 1) if pcts else 0})
+    sectors_q.sort(key=lambda x: -x["pct"])
+    D["sectors_kosdaq"] = sectors_q
 
-def save_data(data):
-    """JSON 파일로 저장"""
-    with open(DATA_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"  -> 저장 완료: {DATA_PATH} ({len(json.dumps(data)):,} bytes)")
+    # ── 6. 거래대금/외국인/신용 (기존 데이터 유지 + 누적) ──
+    for key in ["trading_daily","foreign","deposit_weekly","credit","short_kospi","short_kosdaq","top_sector_foreign"]:
+        if key in ex: D[key] = ex[key]
+        elif key == "credit":
+            D[key] = {"kospi":"—","kospi_chg":"업데이트 필요","kosdaq":"—","kosdaq_chg":"업데이트 필요","ratio":"—","deposit":"—","deposit_chg":"업데이트 필요"}
+        elif key in ("trading_daily","foreign"):
+            D[key] = {"dates":[],"kospi":[],"kosdaq":[]}
+
+    return D
 
 
 if __name__ == "__main__":
-    data = build_market_data()
-    save_data(data)
-    print(f"\n[완료] {data['date']} 데이터 수집 완료!")
-    print(f"  S&P500: {data.get('sp500', {}).get('current', 'N/A')}")
-    print(f"  NASDAQ: {data.get('nasdaq', {}).get('current', 'N/A')}")
-    print(f"  VIX:    {data.get('vix', {}).get('current', 'N/A')}")
-    print(f"  KRW:    {data.get('krw', {}).get('current', 'N/A')}")
+    D = build()
+    with open(DATA_PATH, "w", encoding="utf-8") as f:
+        json.dump(D, f, ensure_ascii=False, indent=2)
+    print(f"\n[완료] {D['date']} | S&P500: {D.get('sp500',{}).get('cur','N/A')} | VIX: {D.get('vix',{}).get('cur','N/A')} | KRW: {D.get('krw',{}).get('cur','N/A')}")
