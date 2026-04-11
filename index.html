@@ -73,15 +73,24 @@ tr:hover td{background:#1a1a40}
 
 <div class="section-header">시총 상위 종목 TOP 10 <span class="badge">KOSPI · KOSDAQ</span></div>
 <div class="grid2">
-  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSPI 시총 TOP 10</div><table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th></tr></thead><tbody id="mk"></tbody></table></div></div>
-  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSDAQ 시총 TOP 10</div><table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th></tr></thead><tbody id="mq"></tbody></table></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSPI 시총 TOP 10</div><table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th><th class="num">시총</th><th class="num">외국인</th></tr></thead><tbody id="mk"></tbody></table></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSDAQ 시총 TOP 10</div><table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">등락률</th><th class="num">시총</th><th class="num">외국인</th></tr></thead><tbody id="mq"></tbody></table></div></div>
 </div>
+
+<div class="section-header">급등 섹터 TOP 5 외국인 + 기관 수급 <span class="badge">당일</span></div>
+<div class="panel"><div class="sec" style="border-top:none">
+  <table><thead><tr><th>순위</th><th>섹터</th><th class="num">등락률</th><th class="num">거래대금</th><th class="num">외국인</th><th class="num">기관</th></tr></thead><tbody id="tsf"></tbody></table>
+</div></div>
 
 <div class="section-header">신용잔고 · 예탁금 · 외국인 수급</div>
 <div class="credit-grid" id="cc"></div>
 <div class="grid2">
-  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">거래대금 추이 (조원)</div><canvas id="cTV" height="50"></canvas></div></div>
-  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">외국인 순매수 추이 (KOSPI, 억원)</div><canvas id="cFK" height="50"></canvas></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">투자자 예탁금 추이 (주간, 조원)</div><canvas id="cDep" height="50"></canvas></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">거래대금 추이 2주 (KOSPI+KOSDAQ, 조원)</div><canvas id="cTV" height="50"></canvas></div></div>
+</div>
+<div class="grid2">
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">외국인 순매수 2주 추이 (KOSPI, 억원)</div><canvas id="cFK" height="50"></canvas></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">외국인 순매수 2주 추이 (KOSDAQ, 억원)</div><canvas id="cFQ" height="50"></canvas></div></div>
 </div>
 
 <div class="section-header">미국 시장 <span class="badge" id="us-date"></span></div>
@@ -144,13 +153,25 @@ async function init(){
   }
   hm('hm-k',D.sectors_kospi);hm('hm-q',D.sectors_kosdaq);
 
-  // 시총 TOP 10
-  function stocks(tbId,data){
+  // 시총 TOP 10 (한국 — 시총+외국인 포함)
+  function stocksKR(tbId,data){
+    const tb=document.getElementById(tbId);if(!data)return;
+    data.forEach(s=>{const cls=s.chg>=0?'green':'red';const fCls=s.foreign&&s.foreign.includes('매수')?'green':'red';const tr=document.createElement('tr');
+      tr.innerHTML=`<td class="bold">${s.name}</td><td class="num">${s.price}</td><td class="num ${cls} bold">${s.chg>=0?'+':''}${s.chg}%</td><td class="num">${s.mcap||''}</td><td class="num ${fCls}" style="font-size:0.78rem">${s.foreign||''}</td>`;tb.appendChild(tr)})
+  }
+  function stocksUS(tbId,data){
     const tb=document.getElementById(tbId);if(!data)return;
     data.forEach(s=>{const cls=s.chg>=0?'green':'red';const tr=document.createElement('tr');
-      tr.innerHTML=`<td class="bold">${s.name}</td><td class="num">${s.price}</td><td class="num ${cls} bold">${s.chg>=0?'+':''}${s.chg}%</td>`;tb.appendChild(tr)})
+      tr.innerHTML=`<td class="bold">${s.name}</td><td class="num">${s.price}</td><td class="num ${cls} bold">${s.chg>=0?'+':''}${s.chg}%</td><td class="num">${s.mcap||''}</td>`;tb.appendChild(tr)})
   }
-  stocks('mk',D.kospi_stocks);stocks('mq',D.kosdaq_stocks);stocks('ms',D.sp500_stocks);stocks('mn',D.nasdaq_stocks);
+  stocksKR('mk',D.kospi_stocks);stocksKR('mq',D.kosdaq_stocks);stocksUS('ms',D.sp500_stocks);stocksUS('mn',D.nasdaq_stocks);
+
+  // 급등 섹터 TOP5
+  if(D.top_sector_foreign){
+    const tb=document.getElementById('tsf');
+    D.top_sector_foreign.forEach(s=>{const tr=document.createElement('tr');
+      tr.innerHTML=`<td class="bold orange">${s.rank}</td><td class="bold">${s.name}</td><td class="num green bold">+${s.pct}%</td><td class="num">${s.tradingVal}</td><td class="num green bold">${s.foreignNet}</td><td class="num green bold">${s.instNet}</td>`;tb.appendChild(tr)})
+  }
 
   // 신용/예탁금
   if(D.credit){
@@ -160,12 +181,19 @@ async function init(){
       el.innerHTML=`<div class="c-label">${it.l}</div><div class="c-val">${it.v}</div><div class="c-sub">${it.s}</div>`;cc.appendChild(el)})
   }
 
-  // 거래대금/외국인 차트
+  // 예탁금 추이
+  if(D.deposit_weekly&&D.deposit_weekly.dates.length){
+    LC('cDep',D.deposit_weekly.dates,D.deposit_weekly.vals,'#7ecfff')
+  }
+  // 거래대금 2주
   if(D.trading_daily&&D.trading_daily.dates.length){
     new Chart(document.getElementById('cTV'),{type:'bar',data:{labels:D.trading_daily.dates,datasets:[{label:'KOSPI',data:D.trading_daily.kospi,backgroundColor:'#3498db88',borderRadius:4},{label:'KOSDAQ',data:D.trading_daily.kosdaq,backgroundColor:'#9b59b688',borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},boxWidth:14}}},scales:{y:{ticks:DT,grid:DG,stacked:true},x:{ticks:DT,grid:NG,stacked:true}}}})
   }
+  // 외국인 순매수 KOSPI
   if(D.foreign&&D.foreign.dates.length){
     new Chart(document.getElementById('cFK'),{type:'bar',data:{labels:D.foreign.dates,datasets:[{data:D.foreign.kospi,backgroundColor:D.foreign.kospi.map(v=>v>=0?'#3498db88':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}})
+    // 외국인 순매수 KOSDAQ
+    new Chart(document.getElementById('cFQ'),{type:'bar',data:{labels:D.foreign.dates,datasets:[{data:D.foreign.kosdaq,backgroundColor:D.foreign.kosdaq.map(v=>v>=0?'#9b59b688':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}})
   }
 
   // 미국 지수
