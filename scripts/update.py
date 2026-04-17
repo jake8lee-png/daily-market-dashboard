@@ -83,19 +83,29 @@ def build():
     kr_kospi = {"삼성전자":"005930.KS","SK하이닉스":"000660.KS","삼성전자우":"005935.KS","현대자동차":"005380.KS","LG에너지솔루션":"373220.KS","삼성바이오로직스":"207940.KS","KB금융":"105560.KS","신한지주":"055550.KS","삼성SDI":"006400.KS","NAVER":"035420.KS"}
     kr_kosdaq = {"에코프로비엠":"247540.KS","알테오젠":"196170.KS","에코프로":"086520.KS","삼천당제약":"000250.KS","리노공업":"058470.KS","HLB":"028300.KS","리가켐바이오":"141080.KS","이오테크닉스":"039030.KS","알지노믹스":"476830.KS","HPSP":"403870.KS"}
 
-    def fetch_stocks(stocks_dict):
+    def fetch_stocks(stocks_dict, existing_stocks=None):
+        # 기존 데이터에서 mcap/foreign 보존
+        ex_map = {}
+        if existing_stocks:
+            for s in existing_stocks:
+                ex_map[s["name"]] = s
         result = []
         for name, sym in stocks_dict.items():
             print(f"  {name}...")
             r = yahoo(sym, rng="5d", interval="1d")
             if r and len(r["closes"]) >= 2:
                 cur, prev = r["closes"][-1], r["closes"][-2]
-                result.append({"name": name, "price": f"{int(cur):,}", "chg": round(pct(cur, prev), 1)})
+                entry = {"name": name, "price": f"{int(cur):,}", "chg": round(pct(cur, prev), 1)}
+                # 기존 mcap/foreign 보존
+                if name in ex_map:
+                    if "mcap" in ex_map[name]: entry["mcap"] = ex_map[name]["mcap"]
+                    if "foreign" in ex_map[name]: entry["foreign"] = ex_map[name]["foreign"]
+                result.append(entry)
         return result
 
-    ks = fetch_stocks(kr_kospi)
+    ks = fetch_stocks(kr_kospi, ex.get("kospi_stocks"))
     if ks: D["kospi_stocks"] = ks
-    kq = fetch_stocks(kr_kosdaq)
+    kq = fetch_stocks(kr_kosdaq, ex.get("kosdaq_stocks"))
     if kq: D["kosdaq_stocks"] = kq
 
     # ── 4. 미국 시총 TOP 10 ──
@@ -198,10 +208,20 @@ def build():
         wk_sectors_k.sort(key=lambda x: -x["pct"])
         weekly["sectors_kospi"] = wk_sectors_k
 
-    # 기존 주간 수동 데이터 유지
+    # 기존 주간 수동 데이터 유지 (DART/수동 입력 데이터 보존)
     if "weekly" in ex:
-        for k in ["sectors_kospi_full","sectors_kosdaq","top_sector_foreign","foreign_weekly"]:
+        for k in ["sectors_kospi_full","sectors_kosdaq","top_sector_foreign","foreign_weekly",
+                   "credit","credit_weekly","foreign_fri"]:
             if k in ex["weekly"]: weekly[k] = ex["weekly"][k]
+        # 주간 종목 mcap/foreign_w 보존
+        for skey in ["kospi_stocks","kosdaq_stocks"]:
+            if skey in ex["weekly"]:
+                ex_map = {s["name"]:s for s in ex["weekly"][skey]}
+                if skey in weekly:
+                    for s in weekly[skey]:
+                        if s["name"] in ex_map:
+                            for fk in ["mcap","foreign_w"]:
+                                if fk in ex_map[s["name"]]: s[fk] = ex_map[s["name"]][fk]
 
     D["weekly"] = weekly
 

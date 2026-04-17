@@ -134,17 +134,17 @@ tr:hover td{background:#1a1a40}
 <div class="section-header">시총 상위 종목 — 주간 등락 + 외국인</div>
 <div class="grid2">
   <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSPI 시총 TOP 10 — 주간</div>
-    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">주간 등락</th><th class="num">외국인 주간</th></tr></thead><tbody id="wmk"></tbody></table>
+    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">주간 등락</th><th class="num">시총</th><th class="num">외국인 주간</th></tr></thead><tbody id="wmk"></tbody></table>
   </div></div>
   <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSDAQ 시총 TOP 10 — 주간</div>
-    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">주간 등락</th><th class="num">외국인 주간</th></tr></thead><tbody id="wmq"></tbody></table>
+    <table><thead><tr><th>종목</th><th class="num">현재가</th><th class="num">주간 등락</th><th class="num">시총</th><th class="num">외국인 주간</th></tr></thead><tbody id="wmq"></tbody></table>
   </div></div>
 </div>
 
-<div class="section-header">주간 외국인 순매수 추이</div>
+<div class="section-header">외국인 순매수 누적 추이 <span class="badge">금요일 종가 기준 5주</span></div>
 <div class="grid2">
-  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSPI 외국인 일별 (이번 주, 억원)</div><canvas id="wcFK" height="50"></canvas></div></div>
-  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSDAQ 외국인 일별 (이번 주, 억원)</div><canvas id="wcFQ" height="50"></canvas></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSPI 외국인 주간 누적 (억원)</div><canvas id="wcFK" height="50"></canvas></div></div>
+  <div class="panel"><div class="sec" style="border-top:none"><div class="sec-title">KOSDAQ 외국인 주간 누적 (억원)</div><canvas id="wcFQ" height="50"></canvas></div></div>
 </div>
 
 <div class="section-header">신용잔고 · 예탁금 — 주간 추이</div>
@@ -300,7 +300,7 @@ async function init(){
       const tb=document.getElementById(tbId);if(!data)return;
       data.forEach(s=>{const cls=s.chg_w>=0?'green':'red';const fCls=s.foreign_w&&s.foreign_w.includes('매수')?'green':'red';
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td class="bold">${s.name}</td><td class="num">${s.price}</td><td class="num ${cls} bold">${s.chg_w>=0?'+':''}${s.chg_w}%</td><td class="num ${fCls}" style="font-size:0.78rem">${s.foreign_w||''}</td>`;tb.appendChild(tr)})
+        tr.innerHTML=`<td class="bold">${s.name}</td><td class="num">${s.price}</td><td class="num ${cls} bold">${s.chg_w>=0?'+':''}${s.chg_w}%</td><td class="num">${s.mcap||''}</td><td class="num ${fCls}" style="font-size:0.78rem">${s.foreign_w||''}</td>`;tb.appendChild(tr)})
     }
     wStocksKR('wmk',W.kospi_stocks);wStocksKR('wmq',W.kosdaq_stocks);
 
@@ -312,10 +312,11 @@ async function init(){
     }
     wStocksUS('wms',W.sp500_stocks);wStocksUS('wmn',W.nasdaq_stocks);
 
-    // Weekly 외국인 바 차트
-    if(W.foreign_weekly&&W.foreign_weekly.dates.length){
-      new Chart(document.getElementById('wcFK'),{type:'bar',data:{labels:W.foreign_weekly.dates,datasets:[{data:W.foreign_weekly.kospi,backgroundColor:W.foreign_weekly.kospi.map(v=>v>=0?'#3498db88':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
-      new Chart(document.getElementById('wcFQ'),{type:'bar',data:{labels:W.foreign_weekly.dates,datasets:[{data:W.foreign_weekly.kosdaq,backgroundColor:W.foreign_weekly.kosdaq.map(v=>v>=0?'#9b59b688':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
+    // Weekly 외국인 금요일 누적 차트 (5주)
+    const ff=W.foreign_fri;
+    if(ff&&ff.dates&&ff.dates.length){
+      new Chart(document.getElementById('wcFK'),{type:'bar',data:{labels:ff.dates,datasets:[{data:ff.kospi_cum,backgroundColor:ff.kospi_cum.map(v=>v>=0?'#3498db88':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y>=0?'+':'')+ctx.parsed.y.toLocaleString()+'억 (누적)'}}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
+      new Chart(document.getElementById('wcFQ'),{type:'bar',data:{labels:ff.dates,datasets:[{data:ff.kosdaq_cum,backgroundColor:ff.kosdaq_cum.map(v=>v>=0?'#9b59b688':'#ef535088'),borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y>=0?'+':'')+ctx.parsed.y.toLocaleString()+'억 (누적)'}}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
     }
 
     // Weekly 신용잔고/예탁금 카드
