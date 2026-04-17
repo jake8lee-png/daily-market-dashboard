@@ -179,9 +179,30 @@ function C(d){return d.cur!==undefined?d.cur:d.current||0}
 function P(d){return d.prev!==undefined?d.prev:d.prev_close||0}
 
 async function init(){
-  let D;
-  try{const r=await fetch('data/market.json?t='+Date.now());D=await r.json()}
-  catch(e){document.getElementById('sub').textContent='데이터 로드 실패';return}
+  let D,M;
+  try{
+    const [r1,r2]=await Promise.all([fetch('data/market.json?t='+Date.now()),fetch('data/manual.json?t='+Date.now())]);
+    D=await r1.json(); M=await r2.json();
+  }catch(e){document.getElementById('sub').textContent='데이터 로드 실패';return}
+
+  // manual.json에서 mcap/foreign을 market.json 종목에 merge
+  if(M.kospi_mcap&&D.kospi_stocks){D.kospi_stocks.forEach(s=>{const m=M.kospi_mcap[s.name];if(m){s.mcap=m.mcap;s.foreign=m.foreign}})}
+  if(M.kosdaq_mcap&&D.kosdaq_stocks){D.kosdaq_stocks.forEach(s=>{const m=M.kosdaq_mcap[s.name];if(m){s.mcap=m.mcap;s.foreign=m.foreign}})}
+  // manual 전용 데이터 주입
+  if(!D.top_sector_foreign&&M.top_sector_foreign) D.top_sector_foreign=M.top_sector_foreign;
+  if(!D.credit||D.credit.kospi==='—') D.credit=M.credit;
+  if(!D.deposit_weekly||!D.deposit_weekly.dates||!D.deposit_weekly.dates.length) D.deposit_weekly=M.deposit_weekly;
+  if(!D.trading_daily||!D.trading_daily.dates||!D.trading_daily.dates.length) D.trading_daily=M.trading_daily;
+  if(!D.foreign||!D.foreign.dates||!D.foreign.dates.length) D.foreign=M.foreign;
+  // weekly merge
+  const W=D.weekly||{};
+  if(!W.credit) W.credit=M.weekly_credit?M.weekly_credit.cards:null;
+  if(!W.credit_weekly) W.credit_weekly=M.weekly_credit?M.weekly_credit.chart:null;
+  if(!W.foreign_fri) W.foreign_fri=M.weekly_foreign_fri;
+  if(!W.top_sector_foreign) W.top_sector_foreign=M.weekly_top_sector_foreign;
+  if(W.kospi_stocks&&M.weekly_kospi_mcap){W.kospi_stocks.forEach(s=>{const m=M.weekly_kospi_mcap[s.name];if(m){s.mcap=m.mcap;s.foreign_w=m.foreign_w}})}
+  if(W.kosdaq_stocks&&M.weekly_kosdaq_mcap){W.kosdaq_stocks.forEach(s=>{const m=M.weekly_kosdaq_mcap[s.name];if(m){s.mcap=m.mcap;s.foreign_w=m.foreign_w}})}
+  D.weekly=W;
 
   document.getElementById('sub').innerHTML=`KOSPI · KOSDAQ · S&P 500 · NASDAQ | <strong style="color:#fff">${D.date}</strong> | ${new Date(D.updated_at).toLocaleString('ko-KR')}`;
   document.getElementById('kr-date').textContent=D.date;
