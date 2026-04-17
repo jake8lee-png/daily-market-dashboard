@@ -44,7 +44,8 @@ def yahoo(symbol, rng="1mo", interval="1d"):
                 dates.append(datetime.fromtimestamp(t, tz=KST).strftime("%m-%d"))
                 cl.append(round(c, 2))
         cur = round(meta.get("regularMarketPrice", cl[-1] if cl else 0), 2)
-        prev = round(meta.get("chartPreviousClose", meta.get("previousClose", 0)), 2)
+        # 전일 종가 = closes 배열의 마지막에서 2번째 (chartPreviousClose는 range 시작 가격이라 부정확)
+        prev = round(cl[-2], 2) if len(cl) >= 2 else round(meta.get("previousClose", 0), 2)
         return {"cur": cur, "prev": prev, "dates": dates[-20:], "closes": cl[-20:]}
     except: return None
 
