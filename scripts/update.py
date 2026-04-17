@@ -228,8 +228,69 @@ def build():
     return D
 
 
+
+
+def update_inline_html():
+    """index.html의 인라인 DATA를 market.json + manual.json merge 결과로 교체"""
+    import re
+    
+    # 데이터 로드 + merge
+    try:
+        D = json.load(open(DATA_PATH, "r"))
+    except:
+        print("  [SKIP] market.json 없음")
+        return
+    
+    try:
+        M = json.load(open("data/manual.json", "r"))
+    except:
+        M = {}
+    
+    # merge
+    for skey, mkey in [("kospi_stocks","kospi_mcap"),("kosdaq_stocks","kosdaq_mcap")]:
+        if M.get(mkey) and D.get(skey):
+            for s in D[skey]:
+                m = M[mkey].get(s["name"])
+                if m:
+                    s["mcap"] = m.get("mcap","")
+                    s["foreign"] = m.get("foreign","")
+    
+    if M.get("top_sector_foreign"): D["top_sector_foreign"] = M["top_sector_foreign"]
+    if M.get("credit"): D["credit"] = M["credit"]
+    if M.get("deposit_weekly"): D["deposit_weekly"] = M["deposit_weekly"]
+    if M.get("trading_daily") and M["trading_daily"].get("dates"): D["trading_daily"] = M["trading_daily"]
+    if M.get("foreign") and M["foreign"].get("dates"): D["foreign"] = M["foreign"]
+    
+    W = D.get("weekly", {})
+    if M.get("weekly_credit"):
+        W["credit"] = M["weekly_credit"].get("cards")
+        W["credit_weekly"] = M["weekly_credit"].get("chart")
+    if M.get("weekly_foreign_fri"): W["foreign_fri"] = M["weekly_foreign_fri"]
+    if M.get("weekly_top_sector_foreign"): W["top_sector_foreign"] = M["weekly_top_sector_foreign"]
+    for skey, mkey in [("kospi_stocks","weekly_kospi_mcap"),("kosdaq_stocks","weekly_kosdaq_mcap")]:
+        if W.get(skey) and M.get(mkey):
+            for s in W[skey]:
+                m = M[mkey].get(s["name"])
+                if m:
+                    s["mcap"] = m.get("mcap","")
+                    s["foreign_w"] = m.get("foreign_w","")
+    D["weekly"] = W
+    
+    # index.html 교체
+    html = open("index.html", "r").read()
+    data_str = json.dumps(D, ensure_ascii=False)
+    html = re.sub(
+        r'// ★★★ DATA_START ★★★\nconst DATA = .*;\n// ★★★ DATA_END ★★★',
+        f'// ★★★ DATA_START ★★★\nconst DATA = {data_str};\n// ★★★ DATA_END ★★★',
+        html
+    )
+    open("index.html", "w").write(html)
+    print(f"  -> index.html 인라인 데이터 교체 완료 ({len(data_str):,} bytes)")
+
+
 if __name__ == "__main__":
     D = build()
     with open(DATA_PATH, "w", encoding="utf-8") as f:
         json.dump(D, f, ensure_ascii=False, indent=2)
-    print(f"\n[완료] {D['date']} | S&P500: {D.get('sp500',{}).get('cur','N/A')} | VIX: {D.get('vix',{}).get('cur','N/A')} | KRW: {D.get('krw',{}).get('cur','N/A')}")
+    update_inline_html()
+    print(f"\n[완료] {D['date']} | S&P500: {D.get('sp500',{}).get('cur','N/A')} | VIX: {D.get('vix',{}).get('cur','N/A')}")
