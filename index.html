@@ -338,11 +338,17 @@ function init(){
     // Weekly 신용잔고 + 예탁금 추이 차트
     if(W.credit_weekly){
       const cw=W.credit_weekly;
+      const allCreditVals=[...cw.kospi,...cw.kosdaq];
+      const crMin=Math.floor(Math.min(...allCreditVals)-0.5);
+      const crMax=Math.ceil(Math.max(...allCreditVals)+0.5);
       new Chart(document.getElementById('wcCredit'),{type:'line',data:{labels:cw.dates,datasets:[
-        {label:'KOSPI 신용',data:cw.kospi,borderColor:'#3498db',borderWidth:2,pointRadius:3,tension:.3,fill:false},
-        {label:'KOSDAQ 신용',data:cw.kosdaq,borderColor:'#9b59b6',borderWidth:2,pointRadius:3,tension:.3,borderDash:[4,2],fill:false}
-      ]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},boxWidth:14}}},scales:{y:{ticks:DT,grid:DG},x:{ticks:DT,grid:NG}}}});
-      LC('wcDeposit',cw.dates,cw.deposit,'#7ecfff');
+        {label:'KOSPI 신용',data:cw.kospi,borderColor:'#3498db',backgroundColor:'#3498db15',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#3498db',tension:.3,fill:true},
+        {label:'KOSDAQ 신용',data:cw.kosdaq,borderColor:'#9b59b6',backgroundColor:'#9b59b615',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#9b59b6',tension:.3,fill:true}
+      ]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},boxWidth:14}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'조'}}},scales:{y:{min:crMin,max:crMax,ticks:{...DT,callback:v=>v+'조',stepSize:0.5},grid:DG},x:{ticks:DT,grid:NG}}}});
+      const depVals=cw.deposit;
+      const depMin=Math.floor(Math.min(...depVals)-1);
+      const depMax=Math.ceil(Math.max(...depVals)+1);
+      new Chart(document.getElementById('wcDeposit'),{type:'line',data:{labels:cw.dates,datasets:[{data:depVals,borderColor:'#7ecfff',backgroundColor:'#7ecfff15',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#7ecfff',fill:true,tension:.3}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y+'조'}}},scales:{y:{min:depMin,max:depMax,ticks:{...DT,callback:v=>v+'조',stepSize:0.5},grid:DG},x:{ticks:DT,grid:NG}}}});
     }
   }
 }
