@@ -87,43 +87,43 @@
   "top_sector_foreign": [
     {
       "rank": 1,
-      "name": "의료·정밀기기",
-      "pct": 3.92,
-      "tradingVal": "500억",
-      "foreignNet": "+85억",
-      "instNet": "+120억"
+      "name": "화학",
+      "pct": 2.4,
+      "tradingVal": "1.0조",
+      "foreignNet": "+420억",
+      "instNet": "+280억"
     },
     {
       "rank": 2,
-      "name": "운송·창고",
-      "pct": 3.3,
-      "tradingVal": "1.1조",
-      "foreignNet": "+320억",
-      "instNet": "+180억"
+      "name": "음식료",
+      "pct": 2.4,
+      "tradingVal": "250억",
+      "foreignNet": "+95억",
+      "instNet": "+60억"
     },
     {
       "rank": 3,
-      "name": "섬유·의류",
-      "pct": 2.5,
-      "tradingVal": "222억",
-      "foreignNet": "+12억",
-      "instNet": "+35억"
+      "name": "건설",
+      "pct": 1.2,
+      "tradingVal": "2.8조",
+      "foreignNet": "+180억",
+      "instNet": "+120억"
     },
     {
       "rank": 4,
-      "name": "금속",
-      "pct": 2.2,
-      "tradingVal": "1.5조",
-      "foreignNet": "+280억",
-      "instNet": "+95억"
+      "name": "전기전자",
+      "pct": 0.5,
+      "tradingVal": "15.2조",
+      "foreignNet": "+2,450억",
+      "instNet": "+1,180억"
     },
     {
       "rank": 5,
-      "name": "비금속",
-      "pct": 1.95,
-      "tradingVal": "279억",
-      "foreignNet": "+8억",
-      "instNet": "+15억"
+      "name": "운송장비",
+      "pct": 0.2,
+      "tradingVal": "1.8조",
+      "foreignNet": "+90억",
+      "instNet": "+55억"
     }
   ],
   "credit": {
@@ -383,38 +383,38 @@
   "weekly_top_sector_foreign": [
     {
       "rank": 1,
-      "name": "건설",
-      "pct": 18.2,
-      "foreignNet": "+8,200억",
-      "instNet": "+4,500억"
+      "name": "화학",
+      "pct": 8.5,
+      "foreignNet": "+1,850억",
+      "instNet": "+980억"
     },
     {
       "rank": 2,
-      "name": "증권",
-      "pct": 12.5,
-      "foreignNet": "+3,100억",
-      "instNet": "+1,800억"
+      "name": "음식료",
+      "pct": 7.2,
+      "foreignNet": "+420억",
+      "instNet": "+280억"
     },
     {
       "rank": 3,
-      "name": "전기전자",
-      "pct": 10.8,
-      "foreignNet": "+12,500억",
-      "instNet": "+6,200억"
+      "name": "건설",
+      "pct": 6.8,
+      "foreignNet": "+780억",
+      "instNet": "+540억"
     },
     {
       "rank": 4,
-      "name": "전기·가스",
-      "pct": 9.1,
-      "foreignNet": "+1,200억",
-      "instNet": "+850억"
+      "name": "전기전자",
+      "pct": 5.3,
+      "foreignNet": "+9,500억",
+      "instNet": "+4,800억"
     },
     {
       "rank": 5,
-      "name": "금속",
-      "pct": 8.4,
-      "foreignNet": "+2,800억",
-      "instNet": "+1,100억"
+      "name": "운송장비",
+      "pct": 3.9,
+      "foreignNet": "+520억",
+      "instNet": "+320억"
     }
   ]
 }
