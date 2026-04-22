@@ -90,50 +90,50 @@
       "name": "화학",
       "pct": 2.4,
       "tradingVal": "1.0조",
-      "foreignNet": "+420억",
-      "instNet": "+280억"
+      "foreignNet": "+480억",
+      "instNet": "+310억"
     },
     {
       "rank": 2,
       "name": "음식료",
       "pct": 2.4,
       "tradingVal": "250억",
-      "foreignNet": "+95억",
-      "instNet": "+60억"
+      "foreignNet": "+120억",
+      "instNet": "+85억"
     },
     {
       "rank": 3,
       "name": "건설",
       "pct": 1.2,
       "tradingVal": "2.8조",
-      "foreignNet": "+180억",
-      "instNet": "+120억"
+      "foreignNet": "+210억",
+      "instNet": "+150억"
     },
     {
       "rank": 4,
       "name": "전기전자",
       "pct": 0.5,
       "tradingVal": "15.2조",
-      "foreignNet": "+2,450억",
-      "instNet": "+1,180억"
+      "foreignNet": "+2,850억",
+      "instNet": "+1,450억"
     },
     {
       "rank": 5,
       "name": "운송장비",
       "pct": 0.2,
       "tradingVal": "1.8조",
-      "foreignNet": "+90억",
-      "instNet": "+55억"
+      "foreignNet": "+95억",
+      "instNet": "+60억"
     }
   ],
   "credit": {
-    "kospi": "10.2조",
-    "kospi_chg": "전일대비 <span class=\"red\">+380억</span>",
-    "kosdaq": "7.5조",
-    "kosdaq_chg": "전일대비 <span class=\"red\">+210억</span>",
-    "ratio": "23.1%",
-    "deposit": "55.1조",
-    "deposit_chg": "전주대비 <span class=\"green\">+0.9조</span>"
+    "kospi": "10.5조",
+    "kospi_chg": "전일대비 <span class=\"red\">+285억</span>",
+    "kosdaq": "7.7조",
+    "kosdaq_chg": "전일대비 <span class=\"red\">+180억</span>",
+    "ratio": "23.4%",
+    "deposit": "55.8조",
+    "deposit_chg": "전일대비 <span class=\"green\">+2,100억</span>"
   },
   "deposit_weekly": {
     "dates": [
@@ -157,78 +157,72 @@
   },
   "trading_daily": {
     "dates": [
-      "04-06",
-      "04-07",
-      "04-08",
-      "04-09",
       "04-10",
       "04-13",
       "04-14",
       "04-15",
       "04-16",
-      "04-17"
+      "04-17",
+      "04-20",
+      "04-21",
+      "04-22"
     ],
     "kospi": [
-      28.5,
-      30.2,
-      36.3,
-      32.1,
       23.7,
       25.8,
       27.4,
       29.8,
       31.5,
-      28.3
+      28.3,
+      30.1,
+      32.5,
+      35.2
     ],
     "kosdaq": [
-      11.2,
-      12.1,
-      13.0,
-      12.5,
       13.3,
       11.8,
       12.4,
       13.1,
       12.8,
-      12.2
+      12.2,
+      13.5,
+      14.1,
+      15.3
     ]
   },
   "foreign": {
     "dates": [
-      "04-06",
-      "04-07",
-      "04-08",
-      "04-09",
       "04-10",
       "04-13",
       "04-14",
       "04-15",
       "04-16",
-      "04-17"
+      "04-17",
+      "04-20",
+      "04-21",
+      "04-22"
     ],
     "kospi": [
-      3450,
-      5200,
-      8900,
-      3450,
       3200,
       1850,
       4200,
       6800,
       5300,
-      4100
+      4100,
+      2850,
+      5400,
+      6200
     ],
     "kosdaq": [
-      890,
-      1100,
-      2300,
-      890,
       850,
       520,
       1200,
       1850,
       1420,
-      980
+      980,
+      750,
+      1100,
+      1450
     ]
   },
   "weekly_credit": {
