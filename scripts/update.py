@@ -80,30 +80,43 @@ def build():
         if r: D[k] = r
         elif k in ex: D[k] = ex[k]
 
-    # ── 3. 시총 TOP 10 (한국) — 실제 시총 순위 기준 ──
-    kr_kospi = {
+    # ── 3. 시총 TOP 10 (한국) — 후보 풀에서 자동 선정 ──
+    # KOSPI 시총 상위 후보 풀 (25개)
+    KOSPI_POOL = {
         "삼성전자":"005930.KS","SK하이닉스":"000660.KS","SK스퀘어":"402340.KS",
-        "삼성전자우":"005935.KS","현대자동차":"005380.KS","LG에너지솔루션":"373220.KS",
-        "삼성바이오로직스":"207940.KS","한화에어로스페이스":"012450.KS","기아":"000270.KS",
-        "KB금융":"105560.KS",
+        "삼성전자우":"005935.KS","LG에너지솔루션":"373220.KS","현대자동차":"005380.KS",
+        "삼성바이오로직스":"207940.KS","기아":"000270.KS","KB금융":"105560.KS",
+        "한화에어로스페이스":"012450.KS","셀트리온":"068270.KS","HD현대중공업":"329180.KS",
+        "신한지주":"055550.KS","삼성SDI":"006400.KS","NAVER":"035420.KS",
+        "POSCO홀딩스":"005490.KS","현대모비스":"012330.KS","하나금융지주":"086790.KS",
+        "LG화학":"051910.KS","HD한국조선해양":"009540.KS","두산에너빌리티":"034020.KS",
+        "삼성생명":"032830.KS","LG":"003550.KS","카카오":"035720.KS","포스코퓨처엠":"003670.KS",
     }
-    kr_kosdaq = {
+    # KOSDAQ 시총 상위 후보 풀 (20개)
+    KOSDAQ_POOL = {
         "에코프로비엠":"247540.KS","에코프로":"086520.KS","알테오젠":"196170.KS",
         "삼천당제약":"000250.KS","HLB":"028300.KS","리가켐바이오":"141080.KS",
         "이오테크닉스":"039030.KS","알지노믹스":"476830.KS","HPSP":"403870.KS",
-        "클래시스":"214150.KS",
+        "클래시스":"214150.KS","휴젤":"145020.KS","리노공업":"058470.KS",
+        "파마리서치":"214450.KS","펄어비스":"263750.KS","엔켐":"348370.KS",
+        "에스엠":"041510.KS","JYP Ent.":"035900.KS","네오위즈":"095660.KS",
+        "ISC":"095340.KS","루닛":"328130.KS",
     }
 
-    # 상장주식수 (단위: 백만주) — 시총 자동 계산용
+    # 상장주식수 (백만주) — 시총 자동 계산용
     SHARES = {
         "삼성전자":5919.6,"SK하이닉스":727.9,"SK스퀘어":138.4,"삼성전자우":822.9,
-        "현대자동차":209.4,"LG에너지솔루션":234.0,"삼성바이오로직스":71.2,
-        "한화에어로스페이스":51.6,"기아":397.8,"KB금융":402.3,
+        "LG에너지솔루션":234.0,"현대자동차":209.4,"삼성바이오로직스":71.2,
+        "기아":397.8,"KB금융":402.3,"한화에어로스페이스":51.6,"셀트리온":215.3,
         "HD현대중공업":88.9,"신한지주":474.7,"삼성SDI":68.8,"NAVER":145.9,
-        "셀트리온":215.3,"POSCO홀딩스":79.6,
+        "POSCO홀딩스":79.6,"현대모비스":88.7,"하나금융지주":291.0,"LG화학":70.6,
+        "HD한국조선해양":71.0,"두산에너빌리티":640.6,"삼성생명":200.0,"LG":157.3,
+        "카카오":444.4,"포스코퓨처엠":77.5,
         "에코프로비엠":97.8,"에코프로":131.6,"알테오젠":51.8,"삼천당제약":33.8,
-        "HLB":128.3,"리가켐바이오":38.7,"이오테크닉스":12.3,
-        "알지노믹스":52.1,"HPSP":77.4,"클래시스":64.6,
+        "HLB":128.3,"리가켐바이오":38.7,"이오테크닉스":12.3,"알지노믹스":52.1,
+        "HPSP":77.4,"클래시스":64.6,"휴젤":11.7,"리노공업":15.2,
+        "파마리서치":12.3,"펄어비스":64.3,"엔켐":24.5,
+        "에스엠":23.7,"JYP Ent.":35.5,"네오위즈":22.6,"ISC":21.4,"루닛":21.7,
     }
     def calc_mcap(name, price):
         if name not in SHARES: return None
@@ -113,29 +126,41 @@ def build():
         else: return f"{tril:.1f}조"
 
     def fetch_stocks(stocks_dict, existing_stocks=None):
+        """후보 풀 전체에서 가격 수집 → 시총 계산 → TOP 10 선정"""
         ex_map = {}
         if existing_stocks:
             for s in existing_stocks:
                 ex_map[s["name"]] = s
-        result = []
+        candidates = []
         for name, sym in stocks_dict.items():
             print(f"  {name}...")
             r = yahoo(sym, rng="5d", interval="1d")
             if r and len(r["closes"]) >= 2:
                 cur, prev = r["closes"][-1], r["closes"][-2]
-                entry = {"name": name, "price": f"{int(cur):,}", "chg": round(pct(cur, prev), 1)}
-                # 시총 자동 계산
+                # 시총 계산 (정렬용 raw value)
+                cap_raw = cur * SHARES.get(name, 0) * 1_000_000 if name in SHARES else 0
+                entry = {
+                    "name": name,
+                    "price": f"{int(cur):,}",
+                    "chg": round(pct(cur, prev), 1),
+                    "_cap_raw": cap_raw,
+                }
                 mcap = calc_mcap(name, cur)
                 if mcap: entry["mcap"] = mcap
-                # 외국인은 기존값 보존
                 if name in ex_map and "foreign" in ex_map[name]:
                     entry["foreign"] = ex_map[name]["foreign"]
-                result.append(entry)
-        return result
+                candidates.append(entry)
+        # 시총 내림차순 정렬 후 TOP 10
+        candidates.sort(key=lambda x: -x["_cap_raw"])
+        top10 = candidates[:10]
+        # 정렬용 필드 제거
+        for s in top10:
+            s.pop("_cap_raw", None)
+        return top10
 
-    ks = fetch_stocks(kr_kospi, ex.get("kospi_stocks"))
+    ks = fetch_stocks(KOSPI_POOL, ex.get("kospi_stocks"))
     if ks: D["kospi_stocks"] = ks
-    kq = fetch_stocks(kr_kosdaq, ex.get("kosdaq_stocks"))
+    kq = fetch_stocks(KOSDAQ_POOL, ex.get("kosdaq_stocks"))
     if kq: D["kosdaq_stocks"] = kq
 
     # ── 4. 미국 시총 TOP 10 ──
@@ -211,9 +236,9 @@ def build():
                 result.append({"name": name, "price": f"{int(cur):,}", "chg_w": round(pct(cur, w_ago), 1)})
         return result
 
-    wk_kospi = weekly_stocks(kr_kospi, "kospi_stocks")
+    wk_kospi = weekly_stocks(KOSPI_POOL, "kospi_stocks")
     if wk_kospi: weekly["kospi_stocks"] = wk_kospi
-    wk_kosdaq = weekly_stocks(kr_kosdaq, "kosdaq_stocks")
+    wk_kosdaq = weekly_stocks(KOSDAQ_POOL, "kosdaq_stocks")
     if wk_kosdaq: weekly["kosdaq_stocks"] = wk_kosdaq
 
     # 미국 종목 주간
@@ -276,14 +301,14 @@ def update_inline_html():
     except:
         M = {}
     
-    # merge
+    # merge — manual에 mcap 있으면 우선 사용, 없으면 update.py 자동 계산값 유지
     for skey, mkey in [("kospi_stocks","kospi_mcap"),("kosdaq_stocks","kosdaq_mcap")]:
         if M.get(mkey) and D.get(skey):
             for s in D[skey]:
                 m = M[mkey].get(s["name"])
                 if m:
-                    s["mcap"] = m.get("mcap","")
-                    s["foreign"] = m.get("foreign","")
+                    if m.get("mcap"): s["mcap"] = m["mcap"]
+                    if m.get("foreign"): s["foreign"] = m["foreign"]
     
     if M.get("top_sector_foreign"): D["top_sector_foreign"] = M["top_sector_foreign"]
     if M.get("credit"): D["credit"] = M["credit"]
@@ -302,8 +327,8 @@ def update_inline_html():
             for s in W[skey]:
                 m = M[mkey].get(s["name"])
                 if m:
-                    s["mcap"] = m.get("mcap","")
-                    s["foreign_w"] = m.get("foreign_w","")
+                    if m.get("mcap"): s["mcap"] = m["mcap"]
+                    if m.get("foreign_w"): s["foreign_w"] = m["foreign_w"]
     D["weekly"] = W
     
     # index.html 교체
