@@ -84,8 +84,23 @@ def build():
     kr_kospi = {"삼성전자":"005930.KS","SK하이닉스":"000660.KS","삼성전자우":"005935.KS","현대자동차":"005380.KS","LG에너지솔루션":"373220.KS","삼성바이오로직스":"207940.KS","KB금융":"105560.KS","신한지주":"055550.KS","삼성SDI":"006400.KS","NAVER":"035420.KS"}
     kr_kosdaq = {"에코프로비엠":"247540.KS","알테오젠":"196170.KS","에코프로":"086520.KS","삼천당제약":"000250.KS","리노공업":"058470.KS","HLB":"028300.KS","리가켐바이오":"141080.KS","이오테크닉스":"039030.KS","알지노믹스":"476830.KS","HPSP":"403870.KS"}
 
+    # 상장주식수 (단위: 백만주) — 시총 자동 계산용
+    SHARES = {
+        "삼성전자":5919.6,"SK하이닉스":727.9,"삼성전자우":822.9,"현대자동차":209.4,
+        "LG에너지솔루션":234.0,"삼성바이오로직스":71.2,"KB금융":402.3,"신한지주":474.7,
+        "삼성SDI":68.8,"NAVER":145.9,
+        "에코프로비엠":97.8,"알테오젠":51.8,"에코프로":131.6,"삼천당제약":33.8,
+        "리노공업":15.2,"HLB":128.3,"리가켐바이오":38.7,"이오테크닉스":12.3,
+        "알지노믹스":52.1,"HPSP":77.4,
+    }
+    def calc_mcap(name, price):
+        if name not in SHARES: return None
+        cap = price * SHARES[name] * 1_000_000  # 원
+        tril = cap / 1e12
+        if tril >= 100: return f"{tril:,.0f}조"
+        else: return f"{tril:.1f}조"
+
     def fetch_stocks(stocks_dict, existing_stocks=None):
-        # 기존 데이터에서 mcap/foreign 보존
         ex_map = {}
         if existing_stocks:
             for s in existing_stocks:
@@ -97,10 +112,12 @@ def build():
             if r and len(r["closes"]) >= 2:
                 cur, prev = r["closes"][-1], r["closes"][-2]
                 entry = {"name": name, "price": f"{int(cur):,}", "chg": round(pct(cur, prev), 1)}
-                # 기존 mcap/foreign 보존
-                if name in ex_map:
-                    if "mcap" in ex_map[name]: entry["mcap"] = ex_map[name]["mcap"]
-                    if "foreign" in ex_map[name]: entry["foreign"] = ex_map[name]["foreign"]
+                # 시총 자동 계산
+                mcap = calc_mcap(name, cur)
+                if mcap: entry["mcap"] = mcap
+                # 외국인은 기존값 보존
+                if name in ex_map and "foreign" in ex_map[name]:
+                    entry["foreign"] = ex_map[name]["foreign"]
                 result.append(entry)
         return result
 
