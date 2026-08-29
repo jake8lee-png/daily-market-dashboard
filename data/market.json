@@ -1,8 +1,8 @@
 {
-  "updated_at": "2026-08-28T04:22:30.504804+09:00",
+  "updated_at": "2026-08-28T12:24:07.045994+09:00",
   "date": "2026-08-28",
   "sp500": {
-    "cur": 7711.68,
+    "cur": 7711.76,
     "prev": 7730.99,
     "dates": [
       "08-03",
@@ -46,11 +46,11 @@
       7677.28,
       7675.7,
       7730.99,
-      7711.68
+      7711.76
     ]
   },
   "nasdaq": {
-    "cur": 26404.55,
+    "cur": 26402.42,
     "prev": 26541.35,
     "dates": [
       "08-03",
@@ -94,11 +94,11 @@
       26151.3,
       26130.2,
       26541.35,
-      26404.55
+      26402.42
     ]
   },
   "vix": {
-    "cur": 14.5,
+    "cur": 14.43,
     "prev": 14.51,
     "dates": [
       "08-03",
@@ -142,7 +142,7 @@
       15.45,
       15.21,
       14.51,
-      14.5
+      14.43
     ]
   },
   "tnx": {
@@ -242,10 +242,9 @@
     ]
   },
   "krw": {
-    "cur": 1378.82,
-    "prev": 1383.49,
+    "cur": 1375.67,
+    "prev": 1380.45,
     "dates": [
-      "08-03",
       "08-04",
       "08-05",
       "08-06",
@@ -264,10 +263,10 @@
       "08-25",
       "08-26",
       "08-27",
+      "08-28",
       "08-29"
     ],
     "closes": [
-      1435.7,
       1428.5,
       1428.43,
       1421.16,
@@ -286,7 +285,8 @@
       1380.76,
       1381.49,
       1383.49,
-      1378.82
+      1380.45,
+      1375.67
     ]
   },
   "dxy": {
@@ -436,229 +436,229 @@
   "kospi_stocks": [
     {
       "name": "삼성전자",
-      "price": "266,000",
-      "chg": 1.7,
-      "mcap": "1,575조"
+      "price": "257,000",
+      "chg": -3.4,
+      "mcap": "1,521조"
     },
     {
       "name": "SK하이닉스",
-      "price": "1,730,000",
-      "chg": 2.5,
-      "mcap": "1,259조"
+      "price": "1,653,000",
+      "chg": -4.5,
+      "mcap": "1,203조"
     },
     {
       "name": "삼성전자우",
-      "price": "194,300",
-      "chg": -1.3,
-      "mcap": "160조"
+      "price": "186,800",
+      "chg": -3.9,
+      "mcap": "154조"
     },
     {
       "name": "SK스퀘어",
-      "price": "1,068,000",
-      "chg": 0.9,
-      "mcap": "148조"
+      "price": "1,028,000",
+      "chg": -3.8,
+      "mcap": "142조"
     },
     {
       "name": "삼성바이오로직스",
-      "price": "1,594,000",
-      "chg": -0.3,
-      "mcap": "113조"
+      "price": "1,486,000",
+      "chg": -6.8,
+      "mcap": "106조"
     },
     {
       "name": "LG에너지솔루션",
-      "price": "370,500",
-      "chg": 5.6,
-      "mcap": "86.7조"
+      "price": "370,000",
+      "chg": -0.1,
+      "mcap": "86.6조"
     },
     {
       "name": "현대자동차",
-      "price": "398,000",
-      "chg": -2.5,
-      "mcap": "83.3조"
+      "price": "399,500",
+      "chg": 0.4,
+      "mcap": "83.7조"
     },
     {
       "name": "KB금융",
-      "price": "168,100",
-      "chg": 0.9,
-      "mcap": "67.6조"
+      "price": "171,600",
+      "chg": 2.1,
+      "mcap": "69.0조"
     },
     {
       "name": "삼성생명",
-      "price": "307,000",
-      "chg": -0.8,
-      "mcap": "61.4조"
+      "price": "310,000",
+      "chg": 1.0,
+      "mcap": "62.0조"
     },
     {
       "name": "한화에어로스페이스",
-      "price": "1,150,000",
-      "chg": 5.8,
-      "mcap": "59.3조"
+      "price": "1,157,000",
+      "chg": 0.6,
+      "mcap": "59.7조"
     }
   ],
   "kosdaq_stocks": [
     {
       "name": "알테오젠",
-      "price": "311,500",
-      "chg": 0.0,
-      "mcap": "16.1조"
+      "price": "320,000",
+      "chg": 2.7,
+      "mcap": "16.6조"
     },
     {
       "name": "에코프로",
-      "price": "92,000",
-      "chg": 5.8,
-      "mcap": "12.1조"
+      "price": "90,200",
+      "chg": -2.0,
+      "mcap": "11.9조"
     },
     {
       "name": "에코프로비엠",
-      "price": "118,000",
-      "chg": 5.8,
-      "mcap": "11.5조"
+      "price": "118,200",
+      "chg": 0.2,
+      "mcap": "11.6조"
     },
     {
       "name": "삼천당제약",
-      "price": "172,800",
-      "chg": 1.0,
+      "price": "171,000",
+      "chg": -1.0,
       "mcap": "5.8조"
     },
     {
       "name": "파마리서치",
-      "price": "432,500",
-      "chg": -2.1,
-      "mcap": "5.3조"
+      "price": "461,500",
+      "chg": 6.7,
+      "mcap": "5.7조"
     },
     {
       "name": "이오테크닉스",
-      "price": "406,500",
-      "chg": 1.5,
-      "mcap": "5.0조"
+      "price": "398,500",
+      "chg": -2.0,
+      "mcap": "4.9조"
     },
     {
       "name": "HLB",
-      "price": "35,450",
-      "chg": -2.9,
-      "mcap": "4.5조"
+      "price": "36,000",
+      "chg": 1.6,
+      "mcap": "4.6조"
     },
     {
       "name": "HPSP",
-      "price": "50,500",
-      "chg": 4.1,
-      "mcap": "3.9조"
+      "price": "51,100",
+      "chg": 1.2,
+      "mcap": "4.0조"
     },
     {
       "name": "리가켐바이오",
-      "price": "99,600",
-      "chg": 1.3,
+      "price": "101,000",
+      "chg": 1.4,
       "mcap": "3.9조"
     },
     {
       "name": "ISC",
-      "price": "171,200",
-      "chg": 3.9,
+      "price": "173,400",
+      "chg": 1.3,
       "mcap": "3.7조"
     }
   ],
   "sp500_stocks": [
     {
       "name": "Apple (AAPL)",
-      "price": "$319.92",
-      "chg": 1.7
+      "price": "$319.70",
+      "chg": 1.6
     },
     {
       "name": "Microsoft (MSFT)",
-      "price": "$513.77",
+      "price": "$513.53",
       "chg": 1.7
     },
     {
       "name": "NVIDIA (NVDA)",
-      "price": "$217.43",
+      "price": "$217.55",
       "chg": -4.6
     },
     {
       "name": "Amazon (AMZN)",
-      "price": "$265.27",
-      "chg": 3.5
+      "price": "$266.43",
+      "chg": 4.0
     },
     {
       "name": "Alphabet (GOOGL)",
-      "price": "$347.54",
-      "chg": 2.0
+      "price": "$346.59",
+      "chg": 1.7
     },
     {
       "name": "Meta (META)",
-      "price": "$577.23",
-      "chg": 1.1
+      "price": "$578.02",
+      "chg": 1.2
     },
     {
       "name": "Berkshire (BRK-B)",
-      "price": "$505.31",
+      "price": "$505.00",
       "chg": 0.3
     },
     {
       "name": "Broadcom (AVGO)",
-      "price": "$368.11",
-      "chg": -0.9
+      "price": "$368.79",
+      "chg": -0.7
     },
     {
       "name": "Tesla (TSLA)",
-      "price": "$347.46",
-      "chg": -2.1
+      "price": "$348.75",
+      "chg": -1.7
     },
     {
       "name": "JPMorgan (JPM)",
-      "price": "$357.23",
-      "chg": 0.8
+      "price": "$357.62",
+      "chg": 1.0
     }
   ],
   "nasdaq_stocks": [
     {
       "name": "Apple (AAPL)",
-      "price": "$319.92",
-      "chg": 1.7
+      "price": "$319.70",
+      "chg": 1.6
     },
     {
       "name": "Microsoft (MSFT)",
-      "price": "$513.77",
+      "price": "$513.53",
       "chg": 1.7
     },
     {
       "name": "NVIDIA (NVDA)",
-      "price": "$217.43",
+      "price": "$217.55",
       "chg": -4.6
     },
     {
       "name": "Amazon (AMZN)",
-      "price": "$265.27",
-      "chg": 3.5
+      "price": "$266.43",
+      "chg": 4.0
     },
     {
       "name": "Alphabet (GOOGL)",
-      "price": "$347.54",
-      "chg": 2.0
+      "price": "$346.59",
+      "chg": 1.7
     },
     {
       "name": "Meta (META)",
-      "price": "$577.23",
-      "chg": 1.1
+      "price": "$578.02",
+      "chg": 1.2
     },
     {
       "name": "Berkshire (BRK-B)",
-      "price": "$505.31",
+      "price": "$505.00",
       "chg": 0.3
     },
     {
       "name": "Broadcom (AVGO)",
-      "price": "$368.11",
-      "chg": -0.9
+      "price": "$368.79",
+      "chg": -0.7
     },
     {
       "name": "Tesla (TSLA)",
-      "price": "$347.46",
-      "chg": -2.1
+      "price": "$348.75",
+      "chg": -1.7
     },
     {
       "name": "JPMorgan (JPM)",
-      "price": "$357.23",
-      "chg": 0.8
+      "price": "$357.62",
+      "chg": 1.0
     }
   ],
   "sectors_kospi": [
@@ -693,24 +693,24 @@
   ],
   "sectors_kosdaq": [
     {
-      "name": "2차전지",
-      "pct": 5.8
-    },
-    {
-      "name": "IT/반도체",
-      "pct": 1.0
-    },
-    {
-      "name": "바이오",
-      "pct": -1.4
+      "name": "기계/장비",
+      "pct": 8.4
     },
     {
       "name": "게임/엔터",
-      "pct": -1.9
+      "pct": 2.7
     },
     {
-      "name": "기계/장비",
-      "pct": -5.1
+      "name": "바이오",
+      "pct": 2.1
+    },
+    {
+      "name": "IT/반도체",
+      "pct": -0.9
+    },
+    {
+      "name": "2차전지",
+      "pct": -0.9
     }
   ],
   "trading_daily": {
@@ -872,24 +872,24 @@
       "chg_pct": 4.45
     },
     "sp500": {
-      "cur": 7711.68,
+      "cur": 7711.76,
       "w_ago": 7652.86,
       "chg_pct": 0.77
     },
     "nasdaq": {
-      "cur": 26404.55,
+      "cur": 26402.42,
       "w_ago": 25980.19,
       "chg_pct": 1.63
     },
     "vix": {
-      "cur": 14.5,
+      "cur": 14.43,
       "w_ago": 15.85,
-      "chg_pct": -8.52
+      "chg_pct": -8.96
     },
     "krw": {
-      "cur": 1378.82,
-      "w_ago": 1384.98,
-      "chg_pct": -0.44
+      "cur": 1375.67,
+      "w_ago": 1380.76,
+      "chg_pct": -0.37
     },
     "dxy": {
       "cur": 99.68,
@@ -904,329 +904,329 @@
     "kospi_stocks": [
       {
         "name": "삼성전자",
-        "price": "266,000",
-        "chg_w": -5.5
-      },
-      {
-        "name": "SK하이닉스",
-        "price": "1,730,000",
+        "price": "257,000",
         "chg_w": 0.0
       },
       {
+        "name": "SK하이닉스",
+        "price": "1,653,000",
+        "chg_w": -1.1
+      },
+      {
         "name": "SK스퀘어",
-        "price": "1,068,000",
-        "chg_w": -4.9
+        "price": "1,028,000",
+        "chg_w": -4.5
       },
       {
         "name": "삼성전자우",
-        "price": "194,300",
-        "chg_w": -6.1
+        "price": "186,800",
+        "chg_w": -1.3
       },
       {
         "name": "LG에너지솔루션",
-        "price": "370,500",
-        "chg_w": 7.9
+        "price": "370,000",
+        "chg_w": 2.2
       },
       {
         "name": "현대자동차",
-        "price": "398,000",
-        "chg_w": -4.1
+        "price": "399,500",
+        "chg_w": -3.5
       },
       {
         "name": "삼성바이오로직스",
-        "price": "1,594,000",
-        "chg_w": 2.8
+        "price": "1,486,000",
+        "chg_w": -5.5
       },
       {
         "name": "기아",
-        "price": "126,100",
-        "chg_w": -3.7
+        "price": "128,000",
+        "chg_w": -2.7
       },
       {
         "name": "KB금융",
-        "price": "168,100",
-        "chg_w": 2.3
+        "price": "171,600",
+        "chg_w": 5.2
       },
       {
         "name": "한화에어로스페이스",
-        "price": "1,150,000",
-        "chg_w": 6.0
+        "price": "1,157,000",
+        "chg_w": 4.7
       },
       {
         "name": "셀트리온",
-        "price": "191,300",
-        "chg_w": -0.5
+        "price": "190,700",
+        "chg_w": -1.7
       },
       {
         "name": "HD현대중공업",
-        "price": "470,000",
-        "chg_w": 3.8
+        "price": "457,000",
+        "chg_w": 0.3
       },
       {
         "name": "신한지주",
-        "price": "108,800",
-        "chg_w": 4.5
+        "price": "109,700",
+        "chg_w": 6.2
       },
       {
         "name": "삼성SDI",
-        "price": "569,000",
-        "chg_w": 19.0
+        "price": "571,000",
+        "chg_w": 10.9
       },
       {
         "name": "NAVER",
-        "price": "216,500",
-        "chg_w": -2.5
+        "price": "220,500",
+        "chg_w": -1.3
       },
       {
         "name": "POSCO홀딩스",
-        "price": "339,500",
-        "chg_w": 9.5
+        "price": "337,500",
+        "chg_w": 3.0
       },
       {
         "name": "현대모비스",
-        "price": "451,500",
-        "chg_w": -9.0
+        "price": "450,500",
+        "chg_w": -9.6
       },
       {
         "name": "하나금융지주",
-        "price": "133,600",
-        "chg_w": 3.7
+        "price": "136,000",
+        "chg_w": 5.7
       },
       {
         "name": "LG화학",
-        "price": "274,500",
-        "chg_w": 8.7
+        "price": "277,000",
+        "chg_w": 1.5
       },
       {
         "name": "HD한국조선해양",
-        "price": "360,500",
-        "chg_w": 3.4
+        "price": "354,500",
+        "chg_w": 0.3
       },
       {
         "name": "두산에너빌리티",
-        "price": "85,900",
-        "chg_w": 17.2
+        "price": "88,200",
+        "chg_w": 20.8
       },
       {
         "name": "삼성생명",
-        "price": "307,000",
-        "chg_w": -6.5
+        "price": "310,000",
+        "chg_w": 8.6
       },
       {
         "name": "LG",
-        "price": "114,500",
-        "chg_w": 6.3
+        "price": "116,300",
+        "chg_w": 2.5
       },
       {
         "name": "카카오",
-        "price": "36,000",
-        "chg_w": 0.6
+        "price": "36,850",
+        "chg_w": 2.9
       },
       {
         "name": "포스코퓨처엠",
-        "price": "184,000",
-        "chg_w": 18.8
+        "price": "186,300",
+        "chg_w": 9.0
       }
     ],
     "kosdaq_stocks": [
       {
         "name": "에코프로비엠",
-        "price": "118,000",
-        "chg_w": 11.7
-      },
-      {
-        "name": "에코프로",
-        "price": "92,000",
-        "chg_w": 12.6
-      },
-      {
-        "name": "알테오젠",
-        "price": "311,500",
-        "chg_w": -2.7
-      },
-      {
-        "name": "삼천당제약",
-        "price": "172,800",
-        "chg_w": 2.4
-      },
-      {
-        "name": "HLB",
-        "price": "35,450",
-        "chg_w": -8.3
-      },
-      {
-        "name": "리가켐바이오",
-        "price": "99,600",
-        "chg_w": -0.4
-      },
-      {
-        "name": "이오테크닉스",
-        "price": "406,500",
-        "chg_w": 0.5
-      },
-      {
-        "name": "HPSP",
-        "price": "50,500",
-        "chg_w": 12.5
-      },
-      {
-        "name": "클래시스",
-        "price": "32,300",
-        "chg_w": 0.5
-      },
-      {
-        "name": "휴젤",
-        "price": "245,500",
-        "chg_w": 0.2
-      },
-      {
-        "name": "리노공업",
-        "price": "66,700",
-        "chg_w": 1.5
-      },
-      {
-        "name": "파마리서치",
-        "price": "432,500",
-        "chg_w": 8.0
-      },
-      {
-        "name": "펄어비스",
-        "price": "31,550",
-        "chg_w": -2.0
-      },
-      {
-        "name": "엔켐",
-        "price": "22,800",
-        "chg_w": 28.3
-      },
-      {
-        "name": "에스엠",
-        "price": "74,600",
-        "chg_w": 4.6
-      },
-      {
-        "name": "JYP Ent.",
-        "price": "39,750",
-        "chg_w": 2.5
-      },
-      {
-        "name": "네오위즈",
-        "price": "17,970",
+        "price": "118,200",
         "chg_w": 1.0
       },
       {
-        "name": "ISC",
-        "price": "171,200",
+        "name": "에코프로",
+        "price": "90,200",
+        "chg_w": 2.6
+      },
+      {
+        "name": "알테오젠",
+        "price": "320,000",
+        "chg_w": -0.2
+      },
+      {
+        "name": "삼천당제약",
+        "price": "171,000",
+        "chg_w": 0.5
+      },
+      {
+        "name": "HLB",
+        "price": "36,000",
+        "chg_w": -4.9
+      },
+      {
+        "name": "리가켐바이오",
+        "price": "101,000",
+        "chg_w": -1.9
+      },
+      {
+        "name": "이오테크닉스",
+        "price": "398,500",
+        "chg_w": 2.7
+      },
+      {
+        "name": "HPSP",
+        "price": "51,100",
+        "chg_w": 16.3
+      },
+      {
+        "name": "클래시스",
+        "price": "33,250",
+        "chg_w": -0.5
+      },
+      {
+        "name": "휴젤",
+        "price": "259,000",
+        "chg_w": 3.4
+      },
+      {
+        "name": "리노공업",
+        "price": "66,800",
+        "chg_w": 3.4
+      },
+      {
+        "name": "파마리서치",
+        "price": "461,500",
         "chg_w": 10.9
       },
       {
+        "name": "펄어비스",
+        "price": "32,500",
+        "chg_w": 0.9
+      },
+      {
+        "name": "엔켐",
+        "price": "21,250",
+        "chg_w": 16.8
+      },
+      {
+        "name": "에스엠",
+        "price": "75,800",
+        "chg_w": 5.4
+      },
+      {
+        "name": "JYP Ent.",
+        "price": "40,100",
+        "chg_w": 1.6
+      },
+      {
+        "name": "네오위즈",
+        "price": "18,470",
+        "chg_w": 1.2
+      },
+      {
+        "name": "ISC",
+        "price": "173,400",
+        "chg_w": 12.4
+      },
+      {
         "name": "루닛",
-        "price": "9,050",
-        "chg_w": -1.7
+        "price": "9,230",
+        "chg_w": -0.3
       }
     ],
     "sp500_stocks": [
       {
         "name": "Apple (AAPL)",
-        "price": "$319.95",
-        "chg_w": 3.1
+        "price": "$319.70",
+        "chg_w": 3.0
       },
       {
         "name": "Microsoft (MSFT)",
-        "price": "$513.79",
+        "price": "$513.53",
         "chg_w": 5.4
       },
       {
         "name": "NVIDIA (NVDA)",
-        "price": "$217.41",
+        "price": "$217.55",
         "chg_w": 4.3
       },
       {
         "name": "Amazon (AMZN)",
-        "price": "$265.32",
-        "chg_w": 1.2
+        "price": "$266.43",
+        "chg_w": 1.7
       },
       {
         "name": "Alphabet (GOOGL)",
-        "price": "$347.52",
-        "chg_w": -0.2
-      },
-      {
-        "name": "Meta (META)",
-        "price": "$577.06",
-        "chg_w": 3.2
-      },
-      {
-        "name": "Berkshire (BRK-B)",
-        "price": "$505.31",
-        "chg_w": 0.2
-      },
-      {
-        "name": "Broadcom (AVGO)",
-        "price": "$368.14",
-        "chg_w": 2.6
-      },
-      {
-        "name": "Tesla (TSLA)",
-        "price": "$347.50",
+        "price": "$346.59",
         "chg_w": -0.4
       },
       {
+        "name": "Meta (META)",
+        "price": "$578.02",
+        "chg_w": 3.4
+      },
+      {
+        "name": "Berkshire (BRK-B)",
+        "price": "$505.00",
+        "chg_w": 0.1
+      },
+      {
+        "name": "Broadcom (AVGO)",
+        "price": "$368.79",
+        "chg_w": 2.8
+      },
+      {
+        "name": "Tesla (TSLA)",
+        "price": "$348.75",
+        "chg_w": -0.1
+      },
+      {
         "name": "JPMorgan (JPM)",
-        "price": "$357.23",
-        "chg_w": 0.2
+        "price": "$357.62",
+        "chg_w": 0.3
       }
     ],
     "nasdaq_stocks": [
       {
         "name": "Apple (AAPL)",
-        "price": "$319.95",
-        "chg_w": 3.1
+        "price": "$319.70",
+        "chg_w": 3.0
       },
       {
         "name": "Microsoft (MSFT)",
-        "price": "$513.79",
+        "price": "$513.53",
         "chg_w": 5.4
       },
       {
         "name": "NVIDIA (NVDA)",
-        "price": "$217.41",
+        "price": "$217.55",
         "chg_w": 4.3
       },
       {
         "name": "Amazon (AMZN)",
-        "price": "$265.32",
-        "chg_w": 1.2
+        "price": "$266.43",
+        "chg_w": 1.7
       },
       {
         "name": "Alphabet (GOOGL)",
-        "price": "$347.52",
-        "chg_w": -0.2
-      },
-      {
-        "name": "Meta (META)",
-        "price": "$577.06",
-        "chg_w": 3.2
-      },
-      {
-        "name": "Berkshire (BRK-B)",
-        "price": "$505.31",
-        "chg_w": 0.2
-      },
-      {
-        "name": "Broadcom (AVGO)",
-        "price": "$368.14",
-        "chg_w": 2.6
-      },
-      {
-        "name": "Tesla (TSLA)",
-        "price": "$347.50",
+        "price": "$346.59",
         "chg_w": -0.4
       },
       {
+        "name": "Meta (META)",
+        "price": "$578.02",
+        "chg_w": 3.4
+      },
+      {
+        "name": "Berkshire (BRK-B)",
+        "price": "$505.00",
+        "chg_w": 0.1
+      },
+      {
+        "name": "Broadcom (AVGO)",
+        "price": "$368.79",
+        "chg_w": 2.8
+      },
+      {
+        "name": "Tesla (TSLA)",
+        "price": "$348.75",
+        "chg_w": -0.1
+      },
+      {
         "name": "JPMorgan (JPM)",
-        "price": "$357.23",
-        "chg_w": 0.2
+        "price": "$357.62",
+        "chg_w": 0.3
       }
     ],
     "sectors_kospi": [
